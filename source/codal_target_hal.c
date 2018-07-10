@@ -1,7 +1,6 @@
 #include "stm32.h"
 #include "codal_target_hal.h"
 #include "CodalDmesg.h"
-#include "CodalCompat.h"
 
 void target_enable_irq()
 {
@@ -34,7 +33,7 @@ void target_reset()
     NVIC_SystemReset();
 }
 
-extern "C" void assert_failed(uint8_t* file, uint32_t line)
+void assert_failed(uint8_t* file, uint32_t line)
 {
     target_panic(920);
 }
@@ -51,6 +50,7 @@ void target_panic(int statusCode)
 
 void target_init()
 {
+    init_Handlers();
     HAL_Init();
 }
 
@@ -60,7 +60,7 @@ void target_init()
  * This is probably overkill, but the ARMCC compiler uses a lot register optimisation
  * in its calling conventions, so better safe than sorry!
  */
-struct PROCESSOR_TCB
+typedef struct PROCESSOR_TCB
 {
     uint32_t R0;
     uint32_t R1;
@@ -78,7 +78,7 @@ struct PROCESSOR_TCB
     uint32_t SP;
     uint32_t LR;
     uint32_t stack_base;
-};
+} PROCESSOR_TCB;
 
 PROCESSOR_WORD_TYPE fiber_initial_stack_base()
 {

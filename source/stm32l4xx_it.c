@@ -31,9 +31,11 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include "stm32l4xx_it.h"
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx.h"
-#include "stm32l4xx_it.h"
+#include "stm32.h"
+
 
 /* USER CODE BEGIN 0 */
 
@@ -44,6 +46,9 @@
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
+void init_Handlers(void){
+
+}
 
 /**
 * @brief This function handles Non maskable interrupt.

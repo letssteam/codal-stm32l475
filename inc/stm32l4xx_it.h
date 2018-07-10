@@ -46,6 +46,7 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+void init_Handlers(void);
 
 void NMI_Handler(void);
 void HardFault_Handler(void);
