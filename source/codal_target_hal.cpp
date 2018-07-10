@@ -29,19 +29,9 @@ void target_wait_us(unsigned long us)
     wait_us(us);
 }
 
-int target_seed_random(uint32_t rand)
-{
-    return codal::seed_random(rand);
-}
-
-int target_random(int max)
-{
-    return codal::random(max);
-}
-
 void target_reset()
 {
-    PWR->CR |= PWR_CR_DBP;
+    PWR->CR1 |= PWR_CR1_DBP;
     RCC->BDCR |= RCC_BDCR_RTCEN;
     RTC->BKP0R = 0x24a22d12; // skip bootloader
     NVIC_SystemReset();
