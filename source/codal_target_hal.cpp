@@ -31,9 +31,6 @@ void target_wait_us(unsigned long us)
 
 void target_reset()
 {
-    PWR->CR1 |= PWR_CR1_DBP;
-    RCC->BDCR |= RCC_BDCR_RTCEN;
-    RTC->BKP0R = 0x24a22d12; // skip bootloader
     NVIC_SystemReset();
 }
 
@@ -52,11 +49,9 @@ void target_panic(int statusCode)
     }
 }
 
-extern "C" void init_irqs();
 void target_init()
 {
     HAL_Init();
-    init_irqs();
 }
 
 /**
