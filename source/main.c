@@ -37,7 +37,7 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "stm32.h"
 #include "stm32l4xx_hal.h"
 #include "dfsdm.h"
 #include "i2c.h"
@@ -228,7 +228,7 @@ void SystemClock_Config(void)
   * @param  line: The line in file as a number.
   * @retval None
   */
-void _Error_Handler(char *file, int line)
+void _Error_Handler(const char *file, int line)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */

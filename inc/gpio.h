@@ -46,7 +46,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
-#include "main.h"
+#include "stm32.h"
 
 /* USER CODE BEGIN Includes */
 

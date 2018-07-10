@@ -45,7 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
-#include "main.h"
+#include "stm32.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -57,7 +57,7 @@ extern I2C_HandleTypeDef hi2c2;
 
 /* USER CODE END Private defines */
 
-extern void _Error_Handler(char *, int);
+extern void _Error_Handler(const char *, int);
 
 void MX_I2C2_Init(void);
 

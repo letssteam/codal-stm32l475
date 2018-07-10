@@ -45,7 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
-#include "main.h"
+#include "stm32.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -58,7 +58,7 @@ extern UART_HandleTypeDef huart3;
 
 /* USER CODE END Private defines */
 
-extern void _Error_Handler(char *, int);
+extern void _Error_Handler(const char *, int);
 
 void MX_USART1_UART_Init(void);
 void MX_USART3_UART_Init(void);
