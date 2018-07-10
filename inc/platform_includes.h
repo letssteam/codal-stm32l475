@@ -8,6 +8,16 @@
 #include <math.h>
 
 #include "stm32.h"
+#include "stm32l4xx_it.h"
+#include "stm32l4xx_hal.h"
+#include "stm32l4xx_hal_cortex.h"
+#include "dfsdm.h"
+#include "i2c.h"
+#include "quadspi.h"
+#include "spi.h"
+#include "usart.h"
+#include "usb_otg.h"
+#include "gpio.h"
 
 #define PROCESSOR_WORD_TYPE uint32_t
 
@@ -25,9 +35,4 @@ void wait_us(uint32_t us);
 #define CODAL_ASSERT(cond)                                                                         \
     if (!(cond))                                                                                   \
     target_panic(909)
-
-#define MBED_ASSERT CODAL_ASSERT
-#define MBED_ERROR(msg) CODAL_ASSERT(0)
-#define MBED_WEAK __attribute__((weak))
-
 #endif
