@@ -52,6 +52,97 @@ const uint32_t ll_pin_defines[16] = {
     LL_GPIO_PIN_15
 };
 
+typedef enum {
+    PortA = 0,
+    PortB = 1,
+    PortC = 2,
+    PortD = 3,
+    PortE = 4,
+    PortF = 5,
+    PortG = 6,
+    PortH = 7,
+    PortI = 8,
+    PortJ = 9,
+    PortK = 10
+} PortName;
+
+// Enable GPIO clock and return GPIO base address
+GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx) {
+    uint32_t gpio_add = 0;
+    switch (port_idx) {
+        case PortA:
+            gpio_add = GPIOA_BASE;
+            __HAL_RCC_GPIOA_CLK_ENABLE();
+            break;
+        case PortB:
+            gpio_add = GPIOB_BASE;
+            __HAL_RCC_GPIOB_CLK_ENABLE();
+            break;
+#if defined(GPIOC_BASE)
+        case PortC:
+            gpio_add = GPIOC_BASE;
+            __HAL_RCC_GPIOC_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOD_BASE
+        case PortD:
+            gpio_add = GPIOD_BASE;
+            __HAL_RCC_GPIOD_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOE_BASE
+        case PortE:
+            gpio_add = GPIOE_BASE;
+            __HAL_RCC_GPIOE_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOF_BASE
+        case PortF:
+            gpio_add = GPIOF_BASE;
+            __HAL_RCC_GPIOF_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOG_BASE
+        case PortG:
+#if defined TARGET_STM32L4
+            __HAL_RCC_PWR_CLK_ENABLE();
+            HAL_PWREx_EnableVddIO2();
+#endif
+            gpio_add = GPIOG_BASE;
+            __HAL_RCC_GPIOG_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOH_BASE
+        case PortH:
+            gpio_add = GPIOH_BASE;
+            __HAL_RCC_GPIOH_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOI_BASE
+        case PortI:
+            gpio_add = GPIOI_BASE;
+            __HAL_RCC_GPIOI_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOJ_BASE
+        case PortJ:
+            gpio_add = GPIOJ_BASE;
+            __HAL_RCC_GPIOJ_CLK_ENABLE();
+            break;
+#endif
+#if defined GPIOK_BASE
+        case PortK:
+            gpio_add = GPIOK_BASE;
+            __HAL_RCC_GPIOK_CLK_ENABLE();
+            break;
+#endif
+        default:
+            error("Pinmap error: wrong port number.");
+            break;
+    }
+    return (GPIO_TypeDef *) gpio_add;
+}
+
 /**
  * Configure pin (mode, speed, output type and pull-up/pull-down)
  */
@@ -154,4 +245,76 @@ void pin_mode(PinNumber pin, PinMode mode)
     } else {
         stm_pin_PullConfig(gpio, ll_pin, GPIO_NOPULL);
     }
+}
+
+void pinmap_pinout(PinNumber pin, const PinMap *map) {
+    if (pin == PinNumber::NC)
+        return;
+
+    while (map->pin != PinNumber::NC) {
+        if (map->pin == pin) {
+            pin_function(pin, map->function);
+
+            pin_mode(pin, PullNone);
+            return;
+        }
+        map++;
+    }
+    error("could not pinout");
+}
+
+uint32_t pinmap_merge(uint32_t a, uint32_t b) {
+    // both are the same (inc both NC)
+    if (a == b)
+        return a;
+
+    // one (or both) is not connected
+    if (a == (uint32_t)NC)
+        return b;
+    if (b == (uint32_t)NC)
+        return a;
+
+    // mis-match error case
+    error("pinmap mis-match");
+    return (uint32_t)NC;
+}
+
+uint32_t pinmap_find_peripheral(PinNumber pin, const PinMap* map) {
+    while (map->pin != PinNumber::NC) {
+        if (map->pin == pin)
+            return map->peripheral;
+        map++;
+    }
+    return (uint32_t)NC;
+}
+
+uint32_t pinmap_peripheral(PinNumber pin, const PinMap* map) {
+    uint32_t peripheral = (uint32_t)NC;
+
+    if (pin == PinNumber::NC)
+        return (uint32_t)NC;
+    peripheral = pinmap_find_peripheral(pin, map);
+    if ((uint32_t)NC == peripheral) // no mapping available
+        error("pinmap not found for peripheral");
+    return peripheral;
+}
+
+uint32_t pinmap_find_function(PinNumber pin, const PinMap* map) {
+    while (map->pin != PinNumber::NC) {
+        if (map->pin == pin)
+            return map->function;
+        map++;
+    }
+    return (uint32_t)NC;
+}
+
+uint32_t pinmap_function(PinNumber pin, const PinMap* map) {
+    uint32_t function = (uint32_t)NC;
+
+    if (pin == PinNumber::NC)
+        return (uint32_t)NC;
+    function = pinmap_find_function(pin, map);
+    if ((uint32_t)NC == function) // no mapping available
+        error("pinmap not found for function");
+    return function;
 }
