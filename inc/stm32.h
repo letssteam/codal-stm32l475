@@ -195,7 +195,7 @@ void _Error_Handler(const char *, int);
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
 
-#define error(msg) _Error_Handler((msg), 0)
+#define codal_error(msg) _Error_Handler((msg), 0)
 
 #ifdef __cplusplus
 }

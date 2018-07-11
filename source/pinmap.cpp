@@ -137,7 +137,7 @@ GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx) {
             break;
 #endif
         default:
-            error("Pinmap error: wrong port number.");
+            codal_error( "Pinmap error: wrong port number.");
             break;
     }
     return (GPIO_TypeDef *) gpio_add;
@@ -260,7 +260,7 @@ void pinmap_pinout(PinNumber pin, const PinMap *map) {
         }
         map++;
     }
-    error("could not pinout");
+    codal_error( "could not pinout");
 }
 
 uint32_t pinmap_merge(uint32_t a, uint32_t b) {
@@ -275,7 +275,7 @@ uint32_t pinmap_merge(uint32_t a, uint32_t b) {
         return a;
 
     // mis-match error case
-    error("pinmap mis-match");
+    codal_error( "pinmap mis-match");
     return (uint32_t)NC;
 }
 
@@ -295,7 +295,7 @@ uint32_t pinmap_peripheral(PinNumber pin, const PinMap* map) {
         return (uint32_t)NC;
     peripheral = pinmap_find_peripheral(pin, map);
     if ((uint32_t)NC == peripheral) // no mapping available
-        error("pinmap not found for peripheral");
+        codal_error( "pinmap not found for peripheral");
     return peripheral;
 }
 
@@ -315,6 +315,6 @@ uint32_t pinmap_function(PinNumber pin, const PinMap* map) {
         return (uint32_t)NC;
     function = pinmap_find_function(pin, map);
     if ((uint32_t)NC == function) // no mapping available
-        error("pinmap not found for function");
+        codal_error( "pinmap not found for function");
     return function;
 }

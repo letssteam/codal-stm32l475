@@ -212,7 +212,7 @@ void pwmout_write(pwmout_t *obj, float value)
     }
 
     if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, channel) != HAL_OK) {
-        error("Cannot initialize PWM\n");
+        codal_error( "Cannot initialize PWM\n");
     }
 
 #if !defined(PWMOUT_INVERTED_NOT_SUPPORTED)
@@ -265,7 +265,7 @@ void pwmout_period_us(pwmout_t *obj, int us)
     }
 
     if (pwm_apb_map_table[i].pwm == 0) {
-        error("Unknown PWM instance");
+        codal_error( "Unknown PWM instance");
     }
 
     if (pwm_apb_map_table[i].pwmoutApb == PWMOUT_ON_APB1) {
@@ -301,7 +301,7 @@ void pwmout_period_us(pwmout_t *obj, int us)
         /*  Period decreases and prescaler increases over loops, so check for
          *  possible out of range cases */
         if ((TimHandle.Init.Period < 0xFFFF) && (TimHandle.Init.Prescaler > 0xFFFF)) {
-            error("Cannot initialize PWM\n");
+            codal_error( "Cannot initialize PWM\n");
             break;
         }
     }
@@ -310,7 +310,7 @@ void pwmout_period_us(pwmout_t *obj, int us)
     TimHandle.Init.CounterMode   = TIM_COUNTERMODE_UP;
 
     if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK) {
-        error("Cannot initialize PWM\n");
+        codal_error( "Cannot initialize PWM\n");
     }
 
     // Save for future use
