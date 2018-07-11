@@ -4,8 +4,8 @@
 
 #include "CodalDmesg.h"
 
-namespace codal
-{
+using namespace codal;
+
 
 STM32L4xxTimer *STM32L4xxTimer::instance;
 
@@ -33,10 +33,31 @@ extern "C" void TIM5_IRQHandler()
 
 void STM32L4xxTimer::init()
 {
+    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    uint32_t PclkFreq;
+
+    // Get clock configuration
+    // Note: PclkFreq contains here the Latency (not used after)
+    HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &PclkFreq);
+
+    PclkFreq = HAL_RCC_GetPCLK1Freq();
+
+    // Enable timer clock
+    __HAL_RCC_TIM5_CLK_ENABLE(); 
+
+    __HAL_RCC_TIM5_FORCE_RESET();
+    __HAL_RCC_TIM5_RELEASE_RESET();
+
     TimHandle.Instance = TIM5;
 
     TimHandle.Init.Period = 0xFFFFFFFF;
-    TimHandle.Init.Prescaler = (uint32_t)((SystemCoreClock / 1000000) - 1);
+
+    if (RCC_ClkInitStruct.APB1CLKDivider == RCC_HCLK_DIV1) {
+        TimHandle.Init.Prescaler   = (uint16_t)((PclkFreq) / 1000000) - 1; // 1 us tick
+    } else {
+        TimHandle.Init.Prescaler   = (uint16_t)((PclkFreq * 2) / 1000000) - 1; // 1 us tick
+    }
+
     TimHandle.Init.ClockDivision = 0;
     TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 
@@ -90,5 +111,3 @@ extern "C" void wait_us(uint32_t us)
         // busy wait
     }
 }
-
-} // namespace codal

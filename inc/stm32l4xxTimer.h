@@ -3,6 +3,7 @@
 
 #include "codal-core/inc/types/Event.h"
 #include "codal-core/inc/driver-models/Timer.h"
+#include "CodalConfig.h"
 
 namespace codal
 {
