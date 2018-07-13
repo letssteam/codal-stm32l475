@@ -1,6 +1,6 @@
 #ifndef CODAL_STM32L4XX_SERIAL_H
 #define CODAL_STM32L4XX_SERIAL_H
-#include "CodalConfig.h"
+
 #include "codal-core/inc/driver-models/Serial.h"
 namespace codal
 {
@@ -28,7 +28,7 @@ class STM32L4xxSerial : public codal::Serial
          *
          *       Buffers aren't allocated until the first send or receive respectively.
          */
-    STM32L4xxSerial(Pin tx, Pin rx, uint8_t rxBufferSize = CODAL_SERIAL_DEFAULT_BUFFER_SIZE, uint8_t txBufferSize = CODAL_SERIAL_DEFAULT_BUFFER_SIZE):Serial(tx, rx, rxBufferSize, txBufferSize)
+    STM32L4xxSerial(Pin& tx, Pin& rx, uint8_t rxBufferSize = CODAL_SERIAL_DEFAULT_BUFFER_SIZE, uint8_t txBufferSize = CODAL_SERIAL_DEFAULT_BUFFER_SIZE):Serial(tx, rx, rxBufferSize, txBufferSize)
     {
     }
 };
