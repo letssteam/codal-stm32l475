@@ -82,11 +82,11 @@ typedef struct PROCESSOR_TCB
 
 PROCESSOR_WORD_TYPE fiber_initial_stack_base()
 {
-    uint32_t mbed_stack_base;
+    uint32_t stack_base;
 
-    mbed_stack_base = DEVICE_STACK_BASE;
+    stack_base = DEVICE_STACK_BASE;
 
-    return mbed_stack_base;
+    return stack_base;
 }
 
 void *tcb_allocate()

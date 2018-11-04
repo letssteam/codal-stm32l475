@@ -2,7 +2,6 @@
 #define DEVICE_FIBER_IMP_H
 
 #include "device_types.h"
-#include "mbed.h"
 
 /**
   *  Thread Context for an ARM Cortex M0 core.
