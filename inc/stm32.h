@@ -184,9 +184,12 @@
   */
 #define USE_FULL_ASSERT    1U
 
-/* USER CODE BEGIN Private defines */
-
-/* USER CODE END Private defines */
+/**
+ * Libc porting layers
+ */
+#if defined (  __GNUC__  ) /* GCC CS3 */
+#define WEAK __attribute__ ((weak))
+#endif
 
 #ifdef __cplusplus
 extern "C" {
