@@ -34,16 +34,6 @@ static STM32L4xxSPI* instances[4];
 
 #define ZERO(f) memset(&f, 0, sizeof(f))
 
-uint32_t codal_setup_pin(Pin& p, uint32_t prev, const PinMap *map)
-{
-    auto pin = p.name;
-    uint32_t tmp = pinmap_peripheral(pin, map);
-    pin_function(pin, pinmap_function(pin, map));
-    pin_mode(pin, PullNone);
-    CODAL_ASSERT(!prev || prev == tmp);
-    return tmp;
-}
-
 static int enable_clock(uint32_t instance)
 {
     switch (instance)
