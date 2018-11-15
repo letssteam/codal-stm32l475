@@ -51,7 +51,17 @@ void digitalWrite( PinNumber pin, uint32_t ulVal );
 
 #ifdef __cplusplus
 }
+
+namespace codal
+{
+class Pin;
+}
+
+uint32_t codal_setup_pin(codal::Pin &p, uint32_t prev, const PinMap *map);
+
 #endif
+
+
 
 #endif
 

@@ -225,13 +225,8 @@ void pin_function(PinNumber pin, int data)
      *  not so important, register can be set at any time.
      *  But for families like F1, speed only applies to output.
      */
-#if defined (TARGET_STM32F1)
-    if (mode == STM_PIN_OUTPUT) {
-#endif
-        LL_GPIO_SetPinSpeed(gpio, ll_pin, LL_GPIO_SPEED_FREQ_HIGH);
-#if defined (TARGET_STM32F1)
-    }
-#endif
+    LL_GPIO_SetPinSpeed(gpio, ll_pin, LL_GPIO_SPEED_FREQ_HIGH);
+
 
     switch (mode) {
         case STM_PIN_INPUT:
@@ -407,4 +402,14 @@ void digitalWrite( PinNumber pin, uint32_t ulVal )
   if(pin != codal::PinNumber::NC) {
       digital_io_write(Get_GPIO_Port(STM_PORT(pin)), STM_PIN(pin), ulVal);
   }
+}
+
+uint32_t codal_setup_pin(codal::Pin& p, uint32_t prev, const PinMap *map)
+{
+    auto pin = p.name;
+    uint32_t tmp = pinmap_peripheral(pin, map);
+    pin_function(pin, pinmap_function(pin, map));
+    pin_mode(pin, PullNone);
+    CODAL_ASSERT(!prev || prev == tmp);
+    return tmp;
 }

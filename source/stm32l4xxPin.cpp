@@ -197,7 +197,7 @@ int STM32L4xxPin::getDigitalValue(PullMode pull)
 
 int STM32L4xxPin::obtainAnalogChannel()
 {
-    // Move into an analogue output state if necessary
+    // Move into an analog output state if necessary
     if (!(status & IO_STATUS_ANALOG_OUT))
     {
         disconnect();

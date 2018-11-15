@@ -141,6 +141,7 @@ enum class PinNumber:uint8_t {
         SERIAL_RX   = STDIO_UART_RX,
         USBTX       = STDIO_UART_TX,
         USBRX       = STDIO_UART_RX,
+    
         I2C_SCL     = D15,
         I2C_SDA     = D14,
         SPI_MOSI    = D11,
@@ -148,6 +149,14 @@ enum class PinNumber:uint8_t {
         SPI_SCK     = D13,
         SPI_CS      = D10,
         PWM_OUT     = D9,
+        I2C2_SCL     = PB_10,
+        I2C2_SDA     = PB_11,
+        SPI3_MOSI    = PC_12,
+        SPI3_MISO    = PC_11,
+        SPI3_SCK     = PC_10,
+        SPI3_CS      = PD_13,
+        SPI3_RESET   = PA_8,
+        SPI3_IRQ     = PE_6,
 
         /**** USB pins ****/
         USB_OTG_FS_DM = PA_11,
@@ -181,6 +190,14 @@ enum class PinNumber:uint8_t {
         SYS_WKUP3 = PE_6,
         SYS_WKUP4 = PA_2,
         SYS_WKUP5 = PC_5,
+
+        /**** QSPI FLASH pins ****/
+        QSPI_FLASH1_IO0 = PE_12,
+        QSPI_FLASH1_IO1 = PE_13,
+        QSPI_FLASH1_IO2 = PE_14,
+        QSPI_FLASH1_IO3 = PE_15,
+        QSPI_FLASH1_SCK = PE_10,
+        QSPI_FLASH1_CSN = PE_11,
 
         // Not connected
         NC = (uint8_t)(0xFF)
