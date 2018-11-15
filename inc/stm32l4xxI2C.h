@@ -13,7 +13,7 @@ namespace codal
 class STM32L4xxI2C : public codal::I2C
 {
 protected:
-    I2C_HandleTypeDef* i2c;
+    I2C_HandleTypeDef i2c;
     Pin &sda;
     Pin &scl;
     bool needsInit;
@@ -23,18 +23,12 @@ public:
     /**
      * Constructor.
      */
-    STM32L4xxI2C(codal::Pin &sda, codal::Pin &scl):I2C(sda, scl),
-                i2c(nullptr),
-                sda(sda),
-                scl(scl), 
-                needsInit(true)
-    {
-    }
+    STM32L4xxI2C(codal::Pin &sda, codal::Pin &scl);
 
     virtual ~STM32L4xxI2C();
 
     I2C_HandleTypeDef* getHandle(){
-      return i2c;
+      return &i2c;
     }
 
     /** Set the frequency of the I2C interface
