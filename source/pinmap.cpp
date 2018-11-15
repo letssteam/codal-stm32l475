@@ -31,8 +31,6 @@
 #include "pinmap.h"
 #include "pin_device.h"
 
-extern GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx);
-
 const uint32_t ll_pin_defines[16] = {
     LL_GPIO_PIN_0,
     LL_GPIO_PIN_1,
@@ -134,6 +132,68 @@ GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx) {
         case PortK:
             gpio_add = GPIOK_BASE;
             __HAL_RCC_GPIOK_CLK_ENABLE();
+            break;
+#endif
+        default:
+            codal_error( "Pinmap error: wrong port number.");
+            break;
+    }
+    return (GPIO_TypeDef *) gpio_add;
+}
+
+// return GPIO base address
+GPIO_TypeDef *Get_GPIO_Port(uint32_t port_idx) {
+    uint32_t gpio_add = 0;
+    switch (port_idx) {
+        case PortA:
+            gpio_add = GPIOA_BASE;
+            break;
+        case PortB:
+            gpio_add = GPIOB_BASE;
+            break;
+#if defined(GPIOC_BASE)
+        case PortC:
+            gpio_add = GPIOC_BASE;
+            break;
+#endif
+#if defined GPIOD_BASE
+        case PortD:
+            gpio_add = GPIOD_BASE;
+            break;
+#endif
+#if defined GPIOE_BASE
+        case PortE:
+            gpio_add = GPIOE_BASE;
+            break;
+#endif
+#if defined GPIOF_BASE
+        case PortF:
+            gpio_add = GPIOF_BASE;
+            break;
+#endif
+#if defined GPIOG_BASE
+        case PortG:
+            gpio_add = GPIOG_BASE;
+            break;
+#endif
+#if defined GPIOH_BASE
+        case PortH:
+            gpio_add = GPIOH_BASE;
+            break;
+#endif
+#if defined GPIOI_BASE
+        case PortI:
+            gpio_add = GPIOI_BASE;
+            break;
+#endif
+#if defined GPIOJ_BASE
+        case PortJ:
+            gpio_add = GPIOJ_BASE;
+            break;
+#endif
+#if defined GPIOK_BASE
+        case PortK:
+            gpio_add = GPIOK_BASE;
             break;
 #endif
         default:
@@ -317,4 +377,34 @@ uint32_t pinmap_function(PinNumber pin, const PinMap* map) {
     if ((uint32_t)NC == function) // no mapping available
         codal_error( "pinmap not found for function");
     return function;
+}
+
+void  digital_io_init(PinNumber pin, uint32_t mode, uint32_t pull)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+  GPIO_TypeDef* port = Set_GPIO_Clock(STM_PORT(pin));
+  GPIO_InitStructure.Pin = STM_PIN(pin);
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStructure.Mode = mode;
+  GPIO_InitStructure.Pull = pull;
+#ifdef STM32F1xx
+  pinF1_DisconnectDebug(pin);
+#endif /* STM32F1xx */
+  HAL_GPIO_Init(port, &GPIO_InitStructure);
+}
+
+void digital_io_write(GPIO_TypeDef  *port, uint32_t pin, uint32_t val)
+{
+  if(val) {
+    HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET);
+  } else {
+    HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
+  }
+}
+
+void digitalWrite( PinNumber pin, uint32_t ulVal )
+{
+  if(pin != codal::PinNumber::NC) {
+      digital_io_write(Get_GPIO_Port(STM_PORT(pin)), STM_PIN(pin), ulVal);
+  }
 }

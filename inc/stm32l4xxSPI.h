@@ -20,12 +20,13 @@ struct SPI_HandleWithParent : public SPI_HandleTypeDef
 class STM32L4xxSPI : public codal::SPI
 {
 protected:
-    Pin *mosi, *miso, *sclk;
+    Pin& mosi; 
+    Pin& miso; 
+    Pin& sclk;
+    
     uint32_t freq;
 
     SPI_HandleWithParent spi;
-    DMA_HandleTypeDef hdma_tx;
-    DMA_HandleTypeDef hdma_rx;
 
     PVoidCallback doneHandler;
     void *doneHandlerArg;
@@ -46,8 +47,7 @@ public:
      *
      * Default setup is 1 MHz, 8 bit, mode 0.
      */
-    STM32L4xxSPI(codal::Pin &mosi, codal::Pin &miso, codal::Pin &sclk){
-    }
+    STM32L4xxSPI(codal::Pin &mosi, codal::Pin &miso, codal::Pin &sclk);
 
     virtual ~STM32L4xxSPI();
 

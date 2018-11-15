@@ -35,12 +35,19 @@ typedef struct {
 void pin_function(PinNumber pin, int function);
 void pin_mode    (PinNumber pin, PinMode mode);
 
+GPIO_TypeDef *Get_GPIO_Port(uint32_t port_idx);
+extern GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx);
+
 uint32_t pinmap_peripheral(PinNumber pin, const PinMap* map);
 uint32_t pinmap_function(PinNumber pin, const PinMap* map);
 uint32_t pinmap_merge     (uint32_t a, uint32_t b);
 void     pinmap_pinout    (PinNumber pin, const PinMap *map);
 uint32_t pinmap_find_peripheral(PinNumber pin, const PinMap* map);
 uint32_t pinmap_find_function(PinNumber pin, const PinMap* map);
+
+void  digital_io_init(PinNumber pin, uint32_t mode, uint32_t pull);
+void digital_io_write(GPIO_TypeDef  *port, uint32_t pin, uint32_t val);
+void digitalWrite( PinNumber pin, uint32_t ulVal );
 
 #ifdef __cplusplus
 }
