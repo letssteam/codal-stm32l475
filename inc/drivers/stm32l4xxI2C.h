@@ -12,14 +12,17 @@ namespace codal
  */
 class STM32L4xxI2C : public codal::I2C
 {
-protected:
+private:
     I2C_HandleTypeDef i2c;
     Pin &sda;
     Pin &scl;
     bool needsInit;
+public:
+    /**
+    * Post constructor initialisation method.
+    */
     void init();
 
-public:
     /**
      * Constructor.
      */
@@ -98,7 +101,48 @@ public:
       * @return DEVICE_OK or DEVICE_I2C_ERROR if the the read request failed.
       */
     virtual int readRegister(uint16_t address, uint8_t reg, uint8_t *data, int length, bool repeated = true);
+
+    /**
+      * Performs a typical register write operation to the I2C slave device provided.
+      * This consists of:
+      *  - Asserting a Start condition on the bus
+      *  - Selecting the Slave address (as an 8 bit address)
+      *  - Writing the 8 bit register address provided
+      *  - Writing the 8 bit value provided
+      *  - Asserting a Stop condition on the bus
+      *
+      * The CPU will busy wait until the transmission is complete..
+      *
+      * @param address 8bit address of the device to write to
+      * @param reg The 8bit address of the register to write to.
+      * @param value The value to write.
+      *
+      * @return DEVICE_OK on success, DEVICE_I2C_ERROR if the the write request failed.
+      */
+    virtual int writeRegister(uint16_t address, uint8_t reg, uint8_t value);
+
+    /**
+      * Performs a typical register write operation to the I2C slave device provided.
+      * This consists of:
+      *  - Asserting a Start condition on the bus
+      *  - Selecting the Slave address (as an 8 bit address)
+      *  - Writing the 8 bit register address provided
+      *  - Writing the 8 bit value provided
+      *  - Asserting a Stop condition on the bus
+      *
+      * The CPU will busy wait until the transmission is complete..
+      *
+      * @param address 8bit address of the device to write to
+      * @param reg The 8bit address of the register to write to.
+      * @param data A pointer to a memory location of data to be write on bus
+      * @param length The number of mytes to read
+      *
+      * @return DEVICE_OK on success, DEVICE_I2C_ERROR if the the write request failed.
+      */
+    virtual int writeRegister(uint16_t address, uint8_t reg, uint8_t *data, int length);
 };
+
+extern STM32L4xxI2C* default_i2c_sensors_bus;
 } // namespace codal
 
 #endif

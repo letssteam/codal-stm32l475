@@ -1,13 +1,20 @@
 #include "stm32l4xxI2C.h"
+#include "i2c.h"
 #include "pinmap.h"
 #include "PeripheralPins.h"
+#define DMESG(x)  printf("%s\n",x)
+#define DMESGF  printf
 using namespace codal;
 
+STM32L4xxI2C* codal::default_i2c_sensors_bus = nullptr;
 
 #define I2C_TIMEOUT_TICK        100
 
 void STM32L4xxI2C::init()
 {
+    DMESG("STM32L4xxI2C::init()");
+    DMESGF("I2C%d Initialisation\n", i2c.Instance == I2C2 ? 2 : i2c.Instance == I2C1 ? 1 : 0 );
+
     if (!needsInit)
         return;
     needsInit = false;
@@ -17,25 +24,24 @@ void STM32L4xxI2C::init()
         uint32_t inst = 0;
         inst = codal_setup_pin(sda, inst, PinMap_I2C_SDA);
         inst = codal_setup_pin(scl, inst, PinMap_I2C_SCL);
-
         i2c.Instance = (I2C_TypeDef *)inst;
-
-        switch (inst)
-        {
-            case I2C1_BASE:
-                __HAL_RCC_I2C1_CLK_ENABLE();
-            break;
-            case I2C2_BASE:
-                __HAL_RCC_I2C2_CLK_ENABLE();
-            break;
-            case I2C3_BASE:
-            __HAL_RCC_I2C3_CLK_ENABLE();
-            break;
-        }
     }
 
-    int res = HAL_I2C_Init(&i2c);
-    CODAL_ASSERT(res == HAL_OK);
+    I2Cx_Init(&i2c);
+    DMESGF("I2C%d Initialized !\n", i2c.Instance == I2C2 ? 2 : i2c.Instance == I2C1 ? 1 : 0);
+}
+
+STM32L4xxI2C::STM32L4xxI2C(Pin &sda, Pin &scl):I2C(sda, scl),
+    i2c(),
+    sda(sda),
+    scl(scl), 
+    needsInit(true)
+{
+    IC2x_Init_Handler(&i2c);
+}
+
+
+STM32L4xxI2C::~STM32L4xxI2C(){
 }
 
 typedef enum {
@@ -49,26 +55,6 @@ typedef enum {
   I2C_1000KHz = 0x00B0122F
 }i2c_timing_e;
 
-
-STM32L4xxI2C::STM32L4xxI2C(Pin &sda, Pin &scl):I2C(sda, scl),
-    i2c(),
-    sda(sda),
-    scl(scl), 
-    needsInit(true)
-{
-    i2c.Init.Timing = 0x10909CEC;
-    i2c.Init.OwnAddress1 = 0xFE;
-    i2c.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-    i2c.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-    i2c.Init.OwnAddress2 = 0xFE;
-    i2c.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-    i2c.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-    i2c.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-}
-
-
-STM32L4xxI2C::~STM32L4xxI2C(){
-}
 
 /** Set the frequency of the I2C interface
  *
@@ -143,6 +129,7 @@ int STM32L4xxI2C::write(uint16_t address, uint8_t *data, int len, bool repeated)
 
     return ret;
 }
+
 
 /**
  * Issues a standard, 2 byte I2C command read to the I2C bus.
@@ -220,14 +207,92 @@ int STM32L4xxI2C::readRegister(uint16_t address, uint8_t reg, uint8_t *data, int
     if (data == NULL || length <= 0)
         return DEVICE_INVALID_PARAMETER;
 
-    CODAL_ASSERT(!repeated);CODAL_ASSERT(!repeated);
+    CODAL_ASSERT(!repeated);
 
     init();
 
-    auto res = HAL_I2C_Mem_Read(&i2c, address, reg, I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);
+    auto ret = I2Cx_ReadMultiple(&i2c, address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, data, length);
+    return ret == HAL_OK ? DEVICE_OK : DEVICE_I2C_ERROR;
+}
 
-    if (res == HAL_OK)
-        return DEVICE_OK;
-    else
-        return DEVICE_I2C_ERROR;
+/**
+  * Performs a typical register write operation to the I2C slave device provided.
+  * This consists of:
+  *  - Asserting a Start condition on the bus
+  *  - Selecting the Slave address (as an 8 bit address)
+  *  - Writing the 8 bit register address provided
+  *  - Writing the 8 bit value provided
+  *  - Asserting a Stop condition on the bus
+  *
+  * The CPU will busy wait until the transmission is complete..
+  *
+  * @param address 8bit address of the device to write to
+  * @param reg The 8bit address of the register to write to.
+  * @param value The value to write.
+  *
+  * @return DEVICE_OK on success, DEVICE_I2C_ERROR if the the write request failed.
+  */
+int STM32L4xxI2C::writeRegister(uint16_t address, uint8_t reg, uint8_t value){
+    init();
+
+    int ret = I2Cx_WriteMultiple(&i2c, address, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT,(uint8_t*)&value, 1);
+    return ret == HAL_OK ? DEVICE_OK : DEVICE_I2C_ERROR;
+}
+
+ /**
+  * Performs a typical register write operation to the I2C slave device provided.
+  * This consists of:
+  *  - Asserting a Start condition on the bus
+  *  - Selecting the Slave address (as an 8 bit address)
+  *  - Writing the 8 bit register address provided
+  *  - Writing the 8 bit value provided
+  *  - Asserting a Stop condition on the bus
+  *
+  * The CPU will busy wait until the transmission is complete..
+  *
+  * @param address 8bit address of the device to write to
+  * @param reg The 8bit address of the register to write to.
+  * @param data A pointer to a memory location of data to be write on bus
+  * @param length The number of mytes to read
+  *
+  * @return DEVICE_OK on success, DEVICE_I2C_ERROR if the the write request failed.
+  */
+int STM32L4xxI2C::writeRegister(uint16_t address, uint8_t reg, uint8_t *data, int length){
+    if (data == NULL || length <= 0)
+        return DEVICE_INVALID_PARAMETER;
+
+    init();
+
+    int ret = I2Cx_WriteMultiple(&i2c, address, reg, I2C_MEMADD_SIZE_8BIT, data, length);
+    return ret == HAL_OK ? DEVICE_OK : DEVICE_I2C_ERROR;
+}
+
+extern "C"{
+    void SENSOR_IO_Init(void){
+
+    }
+    void SENSOR_IO_DeInit(void){
+
+    }
+
+    void SENSOR_IO_Write(uint8_t Addr, uint8_t Reg, uint8_t Value){
+          I2Cx_WriteMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT,(uint8_t*)&Value, 1);
+    }
+
+    uint8_t  SENSOR_IO_Read(uint8_t Addr, uint8_t Reg){
+      uint8_t read_value = 0;
+      I2Cx_ReadMultiple(default_i2c_sensors_bus->getHandle(), Addr, Reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&read_value, 1);
+      return read_value;
+    }
+
+    uint16_t SENSOR_IO_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *Buffer, uint16_t Length){
+        return I2Cx_ReadMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, Buffer, Length);
+    }
+    void     SENSOR_IO_WriteMultiple(uint8_t Addr, uint8_t Reg, uint8_t *Buffer, uint16_t Length){
+        I2Cx_WriteMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, Buffer, Length);
+    }
+
+    HAL_StatusTypeDef SENSOR_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials){
+        return (I2Cx_IsDeviceReady(default_i2c_sensors_bus->getHandle(), DevAddress, Trials));
+    }
 }

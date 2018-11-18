@@ -301,27 +301,52 @@ typedef enum
 #define DISCOVERY_COMx_RX_GPIO_CLK_DISABLE(__INDEX__)   do { if((__INDEX__) == COM1) {DISCOVERY_COM1_RX_GPIO_CLK_DISABLE();}} while(0)
 
 
-/* User can use this section to tailor I2Cx instance used and associated resources */
+/* User can use this section to tailor I2C2 instance and associated resources */
 /* Definition for I2Cx resources */
-#define DISCOVERY_I2Cx                             I2C2
-#define DISCOVERY_I2Cx_CLK_ENABLE()                __HAL_RCC_I2C2_CLK_ENABLE()
-#define DISCOVERY_I2Cx_CLK_DISABLE()               __HAL_RCC_I2C2_CLK_DISABLE()   
-#define DISCOVERY_DMAx_CLK_ENABLE()                __HAL_RCC_DMA1_CLK_ENABLE()
-#define DISCOVERY_I2Cx_SCL_SDA_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
-#define DISCOVERY_I2Cx_SCL_SDA_GPIO_CLK_DISABLE()  __HAL_RCC_GPIOB_CLK_DISABLE()
+#define DISCOVERY_I2C2                             I2C2
+#define DISCOVERY_I2C2_CLK_ENABLE()                __HAL_RCC_I2C2_CLK_ENABLE()
+#define DISCOVERY_I2C2_CLK_DISABLE()               __HAL_RCC_I2C2_CLK_DISABLE()   
+#define DISCOVERY_DMA1_CLK_ENABLE()                __HAL_RCC_DMA1_CLK_ENABLE()
+#define DISCOVERY_I2C2_SCL_SDA_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
+#define DISCOVERY_I2C2_SCL_SDA_GPIO_CLK_DISABLE()  __HAL_RCC_GPIOB_CLK_DISABLE()
    
-#define DISCOVERY_I2Cx_FORCE_RESET()               __HAL_RCC_I2C2_FORCE_RESET()
-#define DISCOVERY_I2Cx_RELEASE_RESET()             __HAL_RCC_I2C2_RELEASE_RESET()
+#define DISCOVERY_I2C2_FORCE_RESET()               __HAL_RCC_I2C2_FORCE_RESET()
+#define DISCOVERY_I2C2_RELEASE_RESET()             __HAL_RCC_I2C2_RELEASE_RESET()
 
 /* Definition for I2Cx Pins */
-#define DISCOVERY_I2Cx_SCL_PIN                     GPIO_PIN_10
-#define DISCOVERY_I2Cx_SDA_PIN                     GPIO_PIN_11                                               
-#define DISCOVERY_I2Cx_SCL_SDA_GPIO_PORT           GPIOB
-#define DISCOVERY_I2Cx_SCL_SDA_AF                  GPIO_AF4_I2C2
+#define DISCOVERY_I2C2_SCL_PIN                     GPIO_PIN_10
+#define DISCOVERY_I2C2_SDA_PIN                     GPIO_PIN_11                                               
+#define DISCOVERY_I2C2_SCL_SDA_GPIO_PORT           GPIOB
+#define DISCOVERY_I2C2_SCL_SDA_AF                  GPIO_AF4_I2C2
 
 /* I2C interrupt requests */
-#define DISCOVERY_I2Cx_EV_IRQn                     I2C2_EV_IRQn
-#define DISCOVERY_I2Cx_ER_IRQn                     I2C2_ER_IRQn
+#define DISCOVERY_I2C2_EV_IRQn                     I2C2_EV_IRQn
+#define DISCOVERY_I2C2_ER_IRQn                     I2C2_ER_IRQn
+
+
+/* User can use this section to tailor I2C1 instance used and associated resources */
+/* Definition for I2Cx resources */
+#define DISCOVERY_I2C1                             I2C1
+#define DISCOVERY_I2C1_CLK_ENABLE()                __HAL_RCC_I2C1_CLK_ENABLE()
+#define DISCOVERY_I2C1_CLK_DISABLE()               __HAL_RCC_I2C1_CLK_DISABLE()   
+#define DISCOVERY_DMA2_CLK_ENABLE()                __HAL_RCC_DMA2_CLK_ENABLE()
+#define DISCOVERY_I2C1_SCL_SDA_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOB_CLK_ENABLE()
+#define DISCOVERY_I2C1_SCL_SDA_GPIO_CLK_DISABLE()  __HAL_RCC_GPIOB_CLK_DISABLE()
+   
+#define DISCOVERY_I2C1_FORCE_RESET()               __HAL_RCC_I2C1_FORCE_RESET()
+#define DISCOVERY_I2C1_RELEASE_RESET()             __HAL_RCC_I2C1_RELEASE_RESET()
+
+/* Definition for I2Cx Pins */
+#define DISCOVERY_I2C1_SCL_PIN                     GPIO_PIN_8
+#define DISCOVERY_I2C1_SDA_PIN                     GPIO_PIN_9                                               
+#define DISCOVERY_I2C1_SCL_SDA_GPIO_PORT           GPIOB
+#define DISCOVERY_I2C1_SCL_SDA_AF                  GPIO_AF4_I2C1
+
+/* I2C interrupt requests */
+#define DISCOVERY_I2C1_EV_IRQn                     I2C1_EV_IRQn
+#define DISCOVERY_I2C1_ER_IRQn                     I2C1_ER_IRQn
+
+
 
 /* I2C clock speed configuration (in Hz)
   WARNING:
@@ -331,8 +356,8 @@ typedef enum
  #define DISCOVERY_I2C_SPEED                             100000
 #endif /* DISCOVERY_I2C_SPEED */
 
-#ifndef DISCOVERY_I2Cx_TIMING  
-#define DISCOVERY_I2Cx_TIMING                     ((uint32_t)0x00702681)
+#ifndef DISCOVERY_I2C_TIMING  
+#define DISCOVERY_I2C_TIMING                     ((uint32_t)0x00702681)
 #endif /* DISCOVERY_I2Cx_TIMING */ 
 
 

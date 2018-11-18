@@ -1,149 +1,292 @@
-/**
-  ******************************************************************************
-  * File Name          : I2C.c
-  * Description        : This file provides code for the configuration
-  *                      of the I2C instances.
-  ******************************************************************************
-  ** This notice applies to any and all portions of this file
-  * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether 
-  * inserted by the user or by software development tools
-  * are owned by their respective copyright owners.
-  *
-  * COPYRIGHT(c) 2018 STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "i2c.h"
+#include "string.h"
 
-#include "gpio.h"
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-I2C_HandleTypeDef hi2c2;
-
-/* I2C2 init function */
-void MX_I2C2_Init(void)
+/******************************* I2C Routines *********************************/
+/**
+  * @brief  Initializes I2C MSP.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C2_MspInit(I2C_HandleTypeDef *i2c_handler)
 {
+  GPIO_InitTypeDef  gpio_init_structure;
 
-  hi2c2.Instance = I2C2;
-  hi2c2.Init.Timing = 0x10909CEC;
-  hi2c2.Init.OwnAddress1 = 0;
-  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c2.Init.OwnAddress2 = 0;
-  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+  /*** Configure the GPIOs ***/
+  /* Enable GPIO clock */
+  DISCOVERY_I2C2_SCL_SDA_GPIO_CLK_ENABLE();
 
-    /**Configure Analogue filter 
-    */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+  /* Configure I2C Tx, Rx as alternate function */
+  gpio_init_structure.Pin = DISCOVERY_I2C2_SCL_PIN | DISCOVERY_I2C2_SDA_PIN;
+  gpio_init_structure.Mode = GPIO_MODE_AF_OD;
+  gpio_init_structure.Pull = GPIO_PULLUP;
+  gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_init_structure.Alternate = DISCOVERY_I2C2_SCL_SDA_AF;
+  HAL_GPIO_Init(DISCOVERY_I2C2_SCL_SDA_GPIO_PORT, &gpio_init_structure);
 
-    /**Configure Digital filter 
-    */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+  HAL_GPIO_Init(DISCOVERY_I2C2_SCL_SDA_GPIO_PORT, &gpio_init_structure);
 
+  /*** Configure the I2C peripheral ***/
+  /* Enable I2C clock */
+  DISCOVERY_I2C2_CLK_ENABLE();
+
+  /* Force the I2C peripheral clock reset */
+  DISCOVERY_I2C2_FORCE_RESET();
+
+  /* Release the I2C peripheral clock reset */
+  DISCOVERY_I2C2_RELEASE_RESET();
+
+  /* Enable and set I2Cx Interrupt to a lower priority */
+  HAL_NVIC_SetPriority(DISCOVERY_I2C2_EV_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DISCOVERY_I2C2_EV_IRQn);
+
+  /* Enable and set I2Cx Interrupt to a lower priority */
+  HAL_NVIC_SetPriority(DISCOVERY_I2C2_ER_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DISCOVERY_I2C2_ER_IRQn);
 }
 
-void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
+/**
+  * @brief  DeInitializes I2C MSP.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C2_MspDeInit(I2C_HandleTypeDef *i2c_handler)
 {
-
-  GPIO_InitTypeDef GPIO_InitStruct;
-  if(i2cHandle->Instance==I2C2)
-  {
-  /* USER CODE BEGIN I2C2_MspInit 0 */
-
-  /* USER CODE END I2C2_MspInit 0 */
+  GPIO_InitTypeDef  gpio_init_structure;
   
-    /**I2C2 GPIO Configuration    
-    PB10     ------> I2C2_SCL
-    PB11     ------> I2C2_SDA 
-    */
-    GPIO_InitStruct.Pin = INTERNAL_I2C2_SCL_Pin|INTERNAL_I2C2_SDA_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    /* I2C2 clock enable */
-    __HAL_RCC_I2C2_CLK_ENABLE();
-  /* USER CODE BEGIN I2C2_MspInit 1 */
-
-  /* USER CODE END I2C2_MspInit 1 */
-  }
+  /* Configure I2C Tx, Rx as alternate function */
+  gpio_init_structure.Pin = DISCOVERY_I2C2_SCL_PIN | DISCOVERY_I2C2_SDA_PIN;
+  HAL_GPIO_DeInit(DISCOVERY_I2C2_SCL_SDA_GPIO_PORT, gpio_init_structure.Pin);
+  /* Disable GPIO clock */
+  DISCOVERY_I2C2_SCL_SDA_GPIO_CLK_DISABLE();
+  
+  /* Disable I2C clock */
+  DISCOVERY_I2C2_CLK_DISABLE();
 }
 
-void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
+/**
+  * @brief  Initializes I2C HAL.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C2_Init(I2C_HandleTypeDef *i2c_handler)
 {
-
-  if(i2cHandle->Instance==I2C2)
-  {
-  /* USER CODE BEGIN I2C2_MspDeInit 0 */
-
-  /* USER CODE END I2C2_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_I2C2_CLK_DISABLE();
+  /* Init the I2C */
+  I2C2_MspInit(i2c_handler);
+  HAL_I2C_Init(i2c_handler);
   
-    /**I2C2 GPIO Configuration    
-    PB10     ------> I2C2_SCL
-    PB11     ------> I2C2_SDA 
-    */
-    HAL_GPIO_DeInit(GPIOB, INTERNAL_I2C2_SCL_Pin|INTERNAL_I2C2_SDA_Pin);
+  /**Configure Analogue filter */
+  HAL_I2CEx_ConfigAnalogFilter(i2c_handler, I2C_ANALOGFILTER_ENABLE);  
+}
 
-  /* USER CODE BEGIN I2C2_MspDeInit 1 */
+/**
+  * @brief  DeInitializes I2C HAL.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C2_DeInit(I2C_HandleTypeDef *i2c_handler)
+{  /* DeInit the I2C */
+  I2C2_MspDeInit(i2c_handler);
+  HAL_I2C_DeInit(i2c_handler); 
+}
 
-  /* USER CODE END I2C2_MspDeInit 1 */
+/******************************* I2C Routines *********************************/
+/**
+  * @brief  Initializes I2C MSP.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C1_MspInit(I2C_HandleTypeDef *i2c_handler)
+{
+  GPIO_InitTypeDef  gpio_init_structure;
+
+  /*** Configure the GPIOs ***/
+  /* Enable GPIO clock */
+  DISCOVERY_I2C1_SCL_SDA_GPIO_CLK_ENABLE();
+
+  /* Configure I2C Tx, Rx as alternate function */
+  gpio_init_structure.Pin = DISCOVERY_I2C1_SCL_PIN | DISCOVERY_I2C1_SDA_PIN;
+  gpio_init_structure.Mode = GPIO_MODE_AF_OD;
+  gpio_init_structure.Pull = GPIO_PULLUP;
+  gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  gpio_init_structure.Alternate = DISCOVERY_I2C1_SCL_SDA_AF;
+  HAL_GPIO_Init(DISCOVERY_I2C1_SCL_SDA_GPIO_PORT, &gpio_init_structure);
+
+  HAL_GPIO_Init(DISCOVERY_I2C1_SCL_SDA_GPIO_PORT, &gpio_init_structure);
+
+  /*** Configure the I2C peripheral ***/
+  /* Enable I2C clock */
+  DISCOVERY_I2C1_CLK_ENABLE();
+
+  /* Force the I2C peripheral clock reset */
+  DISCOVERY_I2C1_FORCE_RESET();
+
+  /* Release the I2C peripheral clock reset */
+  DISCOVERY_I2C1_RELEASE_RESET();
+
+  /* Enable and set I2Cx Interrupt to a lower priority */
+  HAL_NVIC_SetPriority(DISCOVERY_I2C1_EV_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DISCOVERY_I2C1_EV_IRQn);
+
+  /* Enable and set I2Cx Interrupt to a lower priority */
+  HAL_NVIC_SetPriority(DISCOVERY_I2C1_ER_IRQn, 0x0F, 0);
+  HAL_NVIC_EnableIRQ(DISCOVERY_I2C1_ER_IRQn);
+}
+
+/**
+  * @brief  DeInitializes I2C MSP.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C1_MspDeInit(I2C_HandleTypeDef *i2c_handler)
+{
+  GPIO_InitTypeDef  gpio_init_structure;
+  
+  /* Configure I2C Tx, Rx as alternate function */
+  gpio_init_structure.Pin = DISCOVERY_I2C1_SCL_PIN | DISCOVERY_I2C1_SDA_PIN;
+  HAL_GPIO_DeInit(DISCOVERY_I2C1_SCL_SDA_GPIO_PORT, gpio_init_structure.Pin);
+  /* Disable GPIO clock */
+  DISCOVERY_I2C1_SCL_SDA_GPIO_CLK_DISABLE();
+  
+  /* Disable I2C clock */
+  DISCOVERY_I2C1_CLK_DISABLE();
+}
+
+/**
+  * @brief  Initializes I2C HAL.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C1_Init(I2C_HandleTypeDef *i2c_handler)
+{
+  /* Init the I2C */
+  I2C1_MspInit(i2c_handler);
+  HAL_I2C_Init(i2c_handler);
+  
+  /**Configure Analogue filter */
+  HAL_I2CEx_ConfigAnalogFilter(i2c_handler, I2C_ANALOGFILTER_ENABLE);  
+}
+
+/**
+  * @brief  DeInitializes I2C HAL.
+  * @param  i2c_handler : I2C handler
+  * @retval None
+  */
+void I2C1_DeInit(I2C_HandleTypeDef *i2c_handler)
+{  /* DeInit the I2C */
+  I2C1_MspDeInit(i2c_handler);
+  HAL_I2C_DeInit(i2c_handler); 
+}
+
+void I2Cx_Init(I2C_HandleTypeDef *i2c_handler){
+    switch ((uint32_t)i2c_handler->Instance)
+    {
+        case I2C1_BASE:
+            I2C1_Init(i2c_handler);
+        break;
+        case I2C2_BASE:
+            I2C2_Init(i2c_handler);
+        break;
+    }
+}
+
+void I2Cx_DeInit(I2C_HandleTypeDef *i2c_handler){
+    switch ((uint32_t)i2c_handler->Instance)
+    {
+        case I2C1_BASE:
+            I2C1_DeInit(i2c_handler);
+        break;
+        case I2C2_BASE:
+            I2C2_DeInit(i2c_handler);
+        break;
+    }
+}
+
+void IC2x_Init_Handler(I2C_HandleTypeDef *i2c_handler){
+    memset(i2c_handler, 0, sizeof(*i2c_handler));
+    i2c_handler->Init.Timing           = DISCOVERY_I2C_TIMING;
+    i2c_handler->Init.OwnAddress1      = 0;
+    i2c_handler->Init.AddressingMode   = I2C_ADDRESSINGMODE_7BIT;
+    i2c_handler->Init.DualAddressMode  = I2C_DUALADDRESS_DISABLE;
+    i2c_handler->Init.OwnAddress2      = 0;
+    i2c_handler->Init.GeneralCallMode  = I2C_GENERALCALL_DISABLE;
+    i2c_handler->Init.NoStretchMode    = I2C_NOSTRETCH_DISABLE; 
+}
+
+/**
+  * @brief  Manages error callback by re-initializing I2C.
+  * @param  i2c_handler : I2C handler
+  * @param  Addr: I2C Address
+  * @retval None
+  */
+void I2Cx_Error(I2C_HandleTypeDef *i2c_handler, uint8_t Addr)
+{
+  /* De-initialize the I2C communication bus */
+  HAL_I2C_DeInit(i2c_handler);
+  
+  /* Re-Initialize the I2C communication bus */
+  I2Cx_Init(i2c_handler);
+}
+
+
+/**
+  * @brief  Reads multiple data.
+  * @param  i2c_handler : I2C handler
+  * @param  Addr: I2C address
+  * @param  Reg: Reg address
+  * @param  MemAddress: memory address
+  * @param  Buffer: Pointer to data buffer
+  * @param  Length: Length of the data
+  * @retval HAL status
+  */
+HAL_StatusTypeDef I2Cx_ReadMultiple(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddress, uint8_t *Buffer, uint16_t Length)
+{
+  HAL_StatusTypeDef status = HAL_OK;
+
+  status = HAL_I2C_Mem_Read(i2c_handler, Addr, (uint16_t)Reg, MemAddress, Buffer, Length, 1000);
+
+  /* Check the communication status */
+  if(status != HAL_OK)
+  {
+    /* I2C error occured */
+    I2Cx_Error(i2c_handler, Addr);
   }
-} 
-
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
+  return status;
+}
 
 /**
-  * @}
+  * @brief  Writes a value in a register of the device through BUS in using DMA mode.
+  * @param  i2c_handler : I2C handler
+  * @param  Addr: Device address on BUS Bus.
+  * @param  Reg: The target register address to write
+  * @param  MemAddress: memory address
+  * @param  Buffer: The target register value to be written
+  * @param  Length: buffer size to be written
+  * @retval HAL status
   */
+HAL_StatusTypeDef I2Cx_WriteMultiple(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddress, uint8_t *Buffer, uint16_t Length)
+{
+  HAL_StatusTypeDef status = HAL_OK;
+
+  status = HAL_I2C_Mem_Write(i2c_handler, Addr, (uint16_t)Reg, MemAddress, Buffer, Length, 1000);
+
+  /* Check the communication status */
+  if(status != HAL_OK)
+  {
+    /* Re-Initiaize the I2C Bus */
+    I2Cx_Error(i2c_handler, Addr);
+  }
+  return status;
+}
 
 /**
-  * @}
+  * @brief  Checks if target device is ready for communication. 
+  * @note   This function is used with Memory devices
+  * @param  i2c_handler : I2C handler
+  * @param  DevAddress: Target device address
+  * @param  Trials: Number of trials
+  * @retval HAL status
   */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+HAL_StatusTypeDef I2Cx_IsDeviceReady(I2C_HandleTypeDef *i2c_handler, uint16_t DevAddress, uint32_t Trials)
+{ 
+  return (HAL_I2C_IsDeviceReady(i2c_handler, DevAddress, Trials, 1000));
+}
