@@ -375,6 +375,8 @@ typedef enum
 #define TSENSOR_I2C_ADDRESS     HTS221_I2C_ADDRESS
 #endif
 
+#define VL53L0X_I2C_ADDRESS (uint8_t)0x52
+
 /* NFC I2C address and specific config parameters */
 #define M24SR_I2C_ADDR             (uint8_t)  0xAC /*!< M24SR address */
 #define NFC_I2C_STATUS_SUCCESS     (uint16_t) 0x0000

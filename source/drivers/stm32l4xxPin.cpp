@@ -96,27 +96,8 @@ void STM32L4xxPin::disconnect()
             delete this->btn;
         this->btn = NULL;
     }
-
     status = 0;
 }
-
-// void STM32L4xxPin::config(int status)
-// {
-//     disconnect();
-
-//     int mode = STM_PIN_INPUT;
-//     int pull = GPIO_NOPULL;
-
-//     if (status & IO_STATUS_DIGITAL_OUT)
-//         mode = STM_PIN_OUTPUT;
-//     else if (this->status & IO_STATUS_ANALOG_IN)
-//         mode = STM_PIN_ANALOG;
-
-//     if (status & IO_STATUS_CAN_READ)
-//         pull = map(this->pullMode);
-
-//     pin_function(name, STM_PIN_DATA(mode, pull, 0));
-// }
 
 /**
  * Configures this IO pin as a digital output (if necessary) and sets the pin to 'value'.
