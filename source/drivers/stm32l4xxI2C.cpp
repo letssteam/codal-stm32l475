@@ -269,14 +269,12 @@ int STM32L4xxI2C::writeRegister(uint16_t address, uint8_t reg, uint8_t *data, in
 
 extern "C"{
     void SENSOR_IO_Init(void){
-
     }
     void SENSOR_IO_DeInit(void){
-
     }
 
     void SENSOR_IO_Write(uint8_t Addr, uint8_t Reg, uint8_t Value){
-          I2Cx_WriteMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT,(uint8_t*)&Value, 1);
+        I2Cx_WriteMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT,(uint8_t*)&Value, 1);
     }
 
     uint8_t  SENSOR_IO_Read(uint8_t Addr, uint8_t Reg){
@@ -286,13 +284,23 @@ extern "C"{
     }
 
     uint16_t SENSOR_IO_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *Buffer, uint16_t Length){
+        //printf("SENSOR_IO_ReadMultiple(%x, %x, %lx, %d)\n", Addr, Reg, (uint32_t)Buffer, Length);
         return I2Cx_ReadMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, Buffer, Length);
     }
-    void     SENSOR_IO_WriteMultiple(uint8_t Addr, uint8_t Reg, uint8_t *Buffer, uint16_t Length){
+    void SENSOR_IO_WriteMultiple(uint8_t Addr, uint8_t Reg, uint8_t *Buffer, uint16_t Length){
+        //printf("SENSOR_IO_WriteMultiple(%x, %x, %lx, %d)\n", Addr, Reg, (uint32_t)Buffer, Length);
         I2Cx_WriteMultiple(default_i2c_sensors_bus->getHandle(), Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, Buffer, Length);
     }
 
     HAL_StatusTypeDef SENSOR_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials){
         return (I2Cx_IsDeviceReady(default_i2c_sensors_bus->getHandle(), DevAddress, Trials));
+    }
+
+    void SENSOR_IO_Delay(uint32_t Delay){
+        HAL_Delay(Delay);
+    }
+
+    uint32_t SENSOR_IO_Error(){
+        return default_i2c_sensors_bus->getHandle()->ErrorCode;
     }
 }
