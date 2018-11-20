@@ -12,13 +12,8 @@
 #include "stm32l4xx_it.h"
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_hal_cortex.h"
-#include "dfsdm.h"
 #include "i2c.h"
-#include "quadspi.h"
 #include "spi.h"
-#include "usart.h"
-#include "usb_otg.h"
-#include "gpio.h"
 
 #define PROCESSOR_WORD_TYPE uint32_t
 
