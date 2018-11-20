@@ -3,14 +3,14 @@
 
 #include "pinmap.h"
 #include "PeripheralNames.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 //*** ADC ***
 
 extern const PinMap PinMap_ADC[];
 extern const PinMap PinMap_ADC_Internal[];
-
 //*** DAC ***
-
 extern const PinMap PinMap_DAC[];
 
 //*** I2C ***
@@ -35,5 +35,7 @@ extern const PinMap PinMap_SPI_SSEL[];
 //*** CAN ***
 extern const PinMap PinMap_CAN_RD[];
 extern const PinMap PinMap_CAN_TD[];
-
+#ifdef __cplusplus
+}
+#endif
 #endif

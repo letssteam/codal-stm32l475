@@ -36,7 +36,7 @@
 
 static TIM_HandleTypeDef TimHandle;
 
-void pwmout_init(pwmout_t *obj, PinNumber pin)
+extern "C" void pwmout_init(pwmout_t *obj, PinNumber pin)
 {
     // Get the peripheral name from the pin and assign it to the object
     obj->pwm = (PWMName)pinmap_peripheral(pin, PinMap_PWM);
@@ -160,13 +160,13 @@ void pwmout_init(pwmout_t *obj, PinNumber pin)
     pwmout_period_us(obj, 20000); // 20 ms per default
 }
 
-void pwmout_free(pwmout_t *obj)
+extern "C" void pwmout_free(pwmout_t *obj)
 {
     // Configure GPIO
     pin_function(obj->pin, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
 }
 
-void pwmout_write(pwmout_t *obj, float value)
+extern "C" void pwmout_write(pwmout_t *obj, float value)
 {
     TIM_OC_InitTypeDef sConfig;
     int channel = 0;
@@ -212,20 +212,18 @@ void pwmout_write(pwmout_t *obj, float value)
     }
 
     if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, channel) != HAL_OK) {
-        codal_error( "Cannot initialize PWM\n");
+        printf( "Cannot initialize PWM\n");
     }
 
-#if !defined(PWMOUT_INVERTED_NOT_SUPPORTED)
     if (obj->inverted) {
         HAL_TIMEx_PWMN_Start(&TimHandle, channel);
     } else
-#endif
     {
         HAL_TIM_PWM_Start(&TimHandle, channel);
     }
 }
 
-float pwmout_read(pwmout_t *obj)
+extern "C" float pwmout_read(pwmout_t *obj)
 {
     float value = 0;
     if (obj->period > 0) {
@@ -234,17 +232,17 @@ float pwmout_read(pwmout_t *obj)
     return ((value > (float)1.0) ? (float)(1.0) : (value));
 }
 
-void pwmout_period(pwmout_t *obj, float seconds)
+extern "C" void pwmout_period(pwmout_t *obj, float seconds)
 {
     pwmout_period_us(obj, seconds * 1000000.0f);
 }
 
-void pwmout_period_ms(pwmout_t *obj, int ms)
+extern "C" void pwmout_period_ms(pwmout_t *obj, int ms)
 {
     pwmout_period_us(obj, ms * 1000);
 }
 
-void pwmout_period_us(pwmout_t *obj, int us)
+extern "C" void pwmout_period_us(pwmout_t *obj, int us)
 {
     TimHandle.Instance = (TIM_TypeDef *)(obj->pwm);
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
@@ -265,17 +263,15 @@ void pwmout_period_us(pwmout_t *obj, int us)
     }
 
     if (pwm_apb_map_table[i].pwm == 0) {
-        codal_error( "Unknown PWM instance");
+        printf( "Unknown PWM instance");
     }
 
     if (pwm_apb_map_table[i].pwmoutApb == PWMOUT_ON_APB1) {
         PclkFreq = HAL_RCC_GetPCLK1Freq();
         APBxCLKDivider = RCC_ClkInitStruct.APB1CLKDivider;
     } else {
-#if !defined(PWMOUT_APB2_NOT_SUPPORTED)
         PclkFreq = HAL_RCC_GetPCLK2Freq();
         APBxCLKDivider = RCC_ClkInitStruct.APB2CLKDivider;
-#endif
     }
 
 
@@ -301,7 +297,7 @@ void pwmout_period_us(pwmout_t *obj, int us)
         /*  Period decreases and prescaler increases over loops, so check for
          *  possible out of range cases */
         if ((TimHandle.Init.Period < 0xFFFF) && (TimHandle.Init.Prescaler > 0xFFFF)) {
-            codal_error( "Cannot initialize PWM\n");
+            printf( "Cannot initialize PWM\n");
             break;
         }
     }
@@ -310,7 +306,7 @@ void pwmout_period_us(pwmout_t *obj, int us)
     TimHandle.Init.CounterMode   = TIM_COUNTERMODE_UP;
 
     if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK) {
-        codal_error( "Cannot initialize PWM\n");
+        printf( "Cannot initialize PWM\n");
     }
 
     // Save for future use
@@ -322,17 +318,17 @@ void pwmout_period_us(pwmout_t *obj, int us)
     __HAL_TIM_ENABLE(&TimHandle);
 }
 
-void pwmout_pulsewidth(pwmout_t *obj, float seconds)
+extern "C" void pwmout_pulsewidth(pwmout_t *obj, float seconds)
 {
     pwmout_pulsewidth_us(obj, seconds * 1000000.0f);
 }
 
-void pwmout_pulsewidth_ms(pwmout_t *obj, int ms)
+extern "C" void pwmout_pulsewidth_ms(pwmout_t *obj, int ms)
 {
     pwmout_pulsewidth_us(obj, ms * 1000);
 }
 
-void pwmout_pulsewidth_us(pwmout_t *obj, int us)
+extern "C" void pwmout_pulsewidth_us(pwmout_t *obj, int us)
 {
     float value = (float)us / (float)obj->period;
     pwmout_write(obj, value);

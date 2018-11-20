@@ -28,9 +28,11 @@ extern "C" {
 
 typedef struct {
     PinNumber pin;
-    int peripheral;
-    int function;
+    uint32_t peripheral;
+    uint32_t function;
 } PinMap;
+
+#define NP ((uint32_t)(-1))
 
 void pin_function(PinNumber pin, int function);
 void pin_mode    (PinNumber pin, PinMode mode);

@@ -178,14 +178,16 @@ int STM32L4xxPin::getDigitalValue(PullMode pull)
 
 int STM32L4xxPin::obtainAnalogChannel()
 {
+    
     // Move into an analog output state if necessary
     if (!(status & IO_STATUS_ANALOG_OUT))
     {
         disconnect();
         pin_function(name, STM_PIN_DATA(STM_PIN_OUTPUT, map(this->pullMode), 0));
-        auto cfg = this->pwmCfg = new pwmout_t;
-        pwmout_init(cfg, name);
-        status = IO_STATUS_ANALOG_OUT;
+        this->pwmCfg = new pwmout_t;
+        pwmout_init(this->pwmCfg, name);
+        status |= IO_STATUS_ANALOG_OUT;
+        printf("obtainAnalogChannel()\n");
     }
 
     return DEVICE_OK;
@@ -219,6 +221,7 @@ int STM32L4xxPin::setPWM(uint32_t value, uint32_t period)
  */
 int STM32L4xxPin::setAnalogValue(int value)
 {
+    printf("STM32L4xxPin::setAnalogValue(%d)\n", value);
     // sanitise the level value
     if (value < 0 || value > DEVICE_PIN_MAX_OUTPUT)
         return DEVICE_INVALID_PARAMETER;
