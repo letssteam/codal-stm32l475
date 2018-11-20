@@ -42,10 +42,18 @@ void target_panic(int statusCode)
 {
     target_disable_irq();
 
+#if DEVICE_DMESG_BUFFER_SIZE > 0
     DMESG("*** CODAL PANIC : [%d]", statusCode);
     while (1)
     {
     }
+#else
+    while (1)
+    {
+        printf("*** CODAL PANIC : [%.3d]\n", statusCode);
+        wait_ms(500);
+    }
+#endif
 }
 
 void target_init()

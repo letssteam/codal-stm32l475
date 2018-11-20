@@ -7,7 +7,7 @@
 using namespace codal;
 
 
-STM32L4xxTimer *STM32L4xxTimer::instance;
+STM32L4xxTimer* STM32L4xxTimer::instance;
 
 STM32L4xxTimer::STM32L4xxTimer() : codal::Timer()
 {
@@ -53,9 +53,9 @@ void STM32L4xxTimer::init()
     TimHandle.Init.Period = 0xFFFFFFFF;
 
     if (RCC_ClkInitStruct.APB1CLKDivider == RCC_HCLK_DIV1) {
-        TimHandle.Init.Prescaler   = (uint16_t)((PclkFreq) / 1000000) - 1; // 1 us tick
+        TimHandle.Init.Prescaler   = (uint32_t)((PclkFreq) / 1000000U) - 1U; // 1 us tick
     } else {
-        TimHandle.Init.Prescaler   = (uint16_t)((PclkFreq * 2) / 1000000) - 1; // 1 us tick
+        TimHandle.Init.Prescaler   = (uint32_t)((PclkFreq * 2) / 1000000U) - 1U; // 1 us tick
     }
 
     TimHandle.Init.ClockDivision = 0;
@@ -64,8 +64,11 @@ void STM32L4xxTimer::init()
     if (HAL_TIM_OC_Init(&TimHandle) != HAL_OK)
         CODAL_ASSERT(0);
 
-    NVIC_SetPriority(TIM5_IRQn, 0);
-    NVIC_EnableIRQ(TIM5_IRQn);
+    /* Configure the TIM5 IRQ priority */
+    HAL_NVIC_SetPriority(TIM5_IRQn, 0U, 0U);
+    /* Enable the TIM5 global Interrupt */
+    HAL_NVIC_EnableIRQ(TIM5_IRQn);
+
     HAL_TIM_OC_Start(&TimHandle, TIM_CHANNEL_1);
 
     this->prev = __HAL_TIM_GET_COUNTER(&TimHandle);
@@ -80,8 +83,9 @@ void STM32L4xxTimer::triggerIn(CODAL_TIMESTAMP t)
 
     target_disable_irq();
     __HAL_TIM_DISABLE_IT(&TimHandle, TIM_IT_CC1);
-    __HAL_TIM_SET_COMPARE(&TimHandle, TIM_CHANNEL_1,
-                          (uint32_t)(__HAL_TIM_GET_COUNTER(&TimHandle) + t));
+    __HAL_TIM_SET_COMPARE(&TimHandle, TIM_CHANNEL_1, (uint32_t)(__HAL_TIM_GET_COUNTER(&TimHandle) + t));
+        // Ensure the compare event starts clear
+    __HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_FLAG_CC1);
     __HAL_TIM_ENABLE_IT(&TimHandle, TIM_IT_CC1);
     target_enable_irq();
 }
