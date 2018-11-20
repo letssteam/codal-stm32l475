@@ -148,7 +148,7 @@ extern "C" PUTCHAR_PROTOTYPE
 {
   /* Place your implementation of fputc here */
   /* e.g. write a character to the serial port and Loop until the end of transmission */
-  if(default_serial_debug != nullptr){
+  if(default_serial_debug != nullptr && default_serial_debug->isWriteable()){
     return default_serial_debug->sendChar(ch);
   }
   return 0;
@@ -167,7 +167,7 @@ extern "C" GETCHAR_PROTOTYPE
   /* Place your implementation of fgetc here */
   /* e.g. readwrite a character to the USART2 and Loop until the end of transmission */
   uint8_t ch = 0;
-  if(default_serial_debug != nullptr){
+  if(default_serial_debug != nullptr && default_serial_debug->isReadable()){
     ch = default_serial_debug->read();
   }
   return ch;
