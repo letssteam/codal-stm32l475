@@ -22,6 +22,23 @@ void target_wait(uint32_t milliseconds)
     HAL_Delay(milliseconds);
 }
 
+
+/*
+    The unique device identifier is ideally suited:
+        * for use as serial numbers (for example USB string serial numbers or other end applications)
+        * for use as security keys in order to increase the security of code in Flash memory while using and combining this unique ID with software cryptographic primitives and protocols before programming the internal Flash memory
+        * to activate secure boot processes, etc.
+    The 96-bit unique device identifier provides a reference number which is unique for any
+    device and in any context. These bits can never be altered by the user.
+    The 96-bit unique device identifier can also be read in single bytes/half-words/words in different ways and then be concatenated using a custom algorithm.
+*/
+#define STM32_UUID ((uint32_t *)0x1FFF7A10)
+uint32_t target_get_serial()
+{
+    // uuid[1] is the wafer number plus the lot number, need to check the uniqueness of this...
+    return STM32_UUID[0]^(STM32_UUID[1]*17)^(STM32_UUID[2]*13);
+}
+
 extern void wait_us(uint32_t);
 void target_wait_us(unsigned long us)
 {
