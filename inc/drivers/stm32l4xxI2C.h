@@ -3,7 +3,7 @@
 
 #include "CodalConfig.h"
 #include "codal-core/inc/driver-models/I2C.h"
-#include "Pin.h"
+#include "stm32l4xxPin.h"
 
 namespace codal
 {
@@ -14,8 +14,8 @@ class STM32L4xxI2C : public codal::I2C
 {
 private:
     I2C_HandleTypeDef i2c;
-    Pin &sda;
-    Pin &scl;
+    STM32L4xxPin &sda;
+    STM32L4xxPin &scl;
     bool needsInit;
 public:
     /**
@@ -26,7 +26,7 @@ public:
     /**
      * Constructor.
      */
-    STM32L4xxI2C(codal::Pin &sda, codal::Pin &scl);
+    STM32L4xxI2C(codal::STM32L4xxPin &sda, codal::STM32L4xxPin &scl);
 
     virtual ~STM32L4xxI2C();
 

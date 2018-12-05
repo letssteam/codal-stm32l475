@@ -2,9 +2,14 @@
 #include "i2c.h"
 #include "pinmap.h"
 #include "PeripheralPins.h"
+
 #define DMESG(x)  printf("%s\n",x)
 #define DMESGF  printf
+
 using namespace codal;
+
+#define I2C_TIME_OUT_BASE   10
+#define I2C_TIME_OUT_BYTE   1
 
 STM32L4xxI2C* codal::default_i2c_sensors_bus = nullptr;
 
@@ -31,7 +36,7 @@ void STM32L4xxI2C::init()
     DMESGF("I2C%d Initialized !\n", i2c.Instance == I2C2 ? 2 : i2c.Instance == I2C1 ? 1 : 0);
 }
 
-STM32L4xxI2C::STM32L4xxI2C(Pin &sda, Pin &scl):I2C(sda, scl),
+STM32L4xxI2C::STM32L4xxI2C(STM32L4xxPin &sda, STM32L4xxPin &scl):I2C(sda, scl),
     i2c(),
     sda(sda),
     scl(scl), 
@@ -107,26 +112,11 @@ int STM32L4xxI2C::write(uint16_t address, uint8_t *data, int len, bool repeated)
     init();
 
     int ret = DEVICE_I2C_ERROR;
-    uint32_t tickstart = HAL_GetTick();
-    uint32_t delta = 0;
 
-    do{
-        if(HAL_I2C_Master_Transmit_IT(&(i2c), address, data, len) == HAL_OK){
-            ret = DEVICE_OK;
-            // wait for transfer completion
-            while((HAL_I2C_GetState(&(i2c)) != HAL_I2C_STATE_READY) && (ret == DEVICE_OK)){
-                delta = (HAL_GetTick() - tickstart);
-                if(delta > I2C_TIMEOUT_TICK) {
-                    ret = DEVICE_I2C_ERROR;
-                } else if(HAL_I2C_GetError(&(i2c)) != HAL_I2C_ERROR_NONE) {
-                    ret = DEVICE_I2C_ERROR;
-                }
-            }
-    }
-    /* When Acknowledge failure occurs (Slave don't acknowledge it's address)
-        Master restarts communication */
-    }while(HAL_I2C_GetError(&(i2c)) == HAL_I2C_ERROR_AF && delta < I2C_TIMEOUT_TICK);
-
+    auto res = HAL_I2C_Master_Transmit(&i2c, address, data, len, HAL_MAX_DELAY);
+    if (res == HAL_OK)
+        return DEVICE_OK;
+    
     return ret;
 }
 
@@ -157,27 +147,13 @@ int STM32L4xxI2C::read(uint16_t address, uint8_t *data, int len, bool repeated)
     init();
 
     int ret = DEVICE_I2C_ERROR;
-    uint32_t tickstart = HAL_GetTick();
-    uint32_t delta = 0;
 
-    do{
-        if(HAL_I2C_Master_Receive_IT(&(i2c), address, data, len) == HAL_OK) {
-            ret = DEVICE_OK;
-            // wait for transfer completion
-            while((HAL_I2C_GetState(&(i2c)) != HAL_I2C_STATE_READY) && (ret == DEVICE_OK)){
-                delta = (HAL_GetTick() - tickstart);
-                if( delta > I2C_TIMEOUT_TICK) {
-                    ret = DEVICE_I2C_ERROR;
-                } else if(HAL_I2C_GetError(&(i2c)) != HAL_I2C_ERROR_NONE) {
-                    ret = DEVICE_I2C_ERROR;
-                }
-            }
-        }
-        /* When Acknowledge failure occurs (Slave don't acknowledge it's address)
-            Master restarts communication */
-    }while(HAL_I2C_GetError(&(i2c)) == HAL_I2C_ERROR_AF && delta < I2C_TIMEOUT_TICK);
+    auto res = HAL_I2C_Master_Receive(&i2c, address, data, len, HAL_MAX_DELAY);
 
-return ret;
+    if (res == HAL_OK)
+        return DEVICE_OK;
+
+    return ret;
 }
 
 /**
