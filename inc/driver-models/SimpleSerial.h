@@ -70,6 +70,7 @@ namespace codal
         virtual int send(u_int8_t* data, u_int16_t len){
           for(u_int16_t i = 0; i < len; i++)
             sendChar(data[i]);
+          return len;
         }
 
     };
