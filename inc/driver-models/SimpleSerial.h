@@ -57,6 +57,21 @@ namespace codal
           */
         virtual int isWriteable() = 0;
 
+        /**
+         * Send an array of bytes over the serial line
+         * 
+         * @param data the array of bytes to send
+         * 
+         * @param len the number of bytes to send
+         * 
+         * @return the number of bytes written, or CODAL_SERIAL_IN_USE if another fiber
+         *         is using the serial instance for transmission.
+         */
+        virtual int send(u_int8_t* data, u_int16_t len){
+          for(u_int16_t i = 0; i < len; i++)
+            sendChar(data[i]);
+        }
+
     };
 }
 
