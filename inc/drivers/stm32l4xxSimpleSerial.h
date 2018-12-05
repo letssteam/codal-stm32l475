@@ -3,18 +3,19 @@
 
 #include "CodalConfig.h"
 #include "SimpleSerial.h"
+#include "stm32l4xxPin.h"
 
 namespace codal {
     class STM32L4xxSimpleSerial : public SimpleSerial
     {
-        Pin& tx;
-        Pin& rx;
+        STM32L4xxPin& tx;
+        STM32L4xxPin& rx;
         int baudRate;
 
         UART_HandleTypeDef hDiscoUart;
 
         public:
-        STM32L4xxSimpleSerial(Pin& tx, Pin& rx, int baudRate = CODAL_SERIAL_DEFAULT_BAUD_RATE)
+        STM32L4xxSimpleSerial(STM32L4xxPin& tx, STM32L4xxPin& rx, int baudRate = CODAL_SERIAL_DEFAULT_BAUD_RATE)
             :SimpleSerial(tx, rx, baudRate), 
             tx(tx), 
             rx(rx), 
