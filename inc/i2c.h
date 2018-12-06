@@ -52,7 +52,10 @@ void I2Cx_MspDeInit(I2C_HandleTypeDef *i2c_handler);
 void I2Cx_Init(I2C_HandleTypeDef *i2c_handler);
 void I2Cx_DeInit(I2C_HandleTypeDef *i2c_handler);
 HAL_StatusTypeDef I2Cx_ReadMultiple(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddSize, uint8_t *Buffer, uint16_t Length);
+HAL_StatusTypeDef I2Cx_Read(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddSize, uint8_t value);
+
 HAL_StatusTypeDef I2Cx_WriteMultiple(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddSize, uint8_t *Buffer, uint16_t Length);
+HAL_StatusTypeDef I2Cx_Write(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddress, uint8_t value);
 HAL_StatusTypeDef I2Cx_IsDeviceReady(I2C_HandleTypeDef *i2c_handler, uint16_t DevAddress, uint32_t Trials);
 void I2Cx_Error(I2C_HandleTypeDef *i2c_handler, uint8_t Addr);
 void IC2x_Init_Handler(I2C_HandleTypeDef *i2c_handler);

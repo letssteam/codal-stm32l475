@@ -253,6 +253,11 @@ HAL_StatusTypeDef I2Cx_ReadMultiple(I2C_HandleTypeDef *i2c_handler, uint8_t Addr
   return status;
 }
 
+HAL_StatusTypeDef I2Cx_Read(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddSize, uint8_t value){
+  return I2Cx_ReadMultiple(i2c_handler,Addr, Reg, MemAddSize, &value, 1);
+}
+
+
 /**
   * @brief  Writes a value in a register of the device through BUS in using DMA mode.
   * @param  i2c_handler : I2C handler
@@ -277,6 +282,11 @@ HAL_StatusTypeDef I2Cx_WriteMultiple(I2C_HandleTypeDef *i2c_handler, uint8_t Add
   }
   return status;
 }
+
+HAL_StatusTypeDef I2Cx_Write(I2C_HandleTypeDef *i2c_handler, uint8_t Addr, uint16_t Reg, uint16_t MemAddress, uint8_t value){
+  return I2Cx_WriteMultiple(i2c_handler, Addr, Reg, MemAddress, &value, 1);
+}
+
 
 /**
   * @brief  Checks if target device is ready for communication. 
