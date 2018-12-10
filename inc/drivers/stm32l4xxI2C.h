@@ -142,7 +142,7 @@ public:
     virtual int writeRegister(uint16_t address, uint8_t reg, uint8_t *data, int length);
 };
 
-extern STM32L4xxI2C* default_i2c_sensors_bus;
+extern I2C_HandleTypeDef* default_i2c_sensors_bus;
 } // namespace codal
 
 #endif
