@@ -23,6 +23,10 @@ namespace codal
         {
         }
 
+        virtual void init() = 0;
+
+        virtual void deInit() = 0;
+
         /**
           * Sends a single character over the serial line.
           *
