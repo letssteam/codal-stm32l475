@@ -57,7 +57,7 @@ protected:
 
     void config(int status);
 
-    int setPWM(uint32_t value, uint32_t period);
+    int setPWM(uint64_t value, uint32_t period);
 
     /**
      * Performs a check to ensure that the current Pin is in control of a

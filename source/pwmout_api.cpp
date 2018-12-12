@@ -29,10 +29,13 @@
  */
 #include "pwmout_api.h"
 
+#include "CodalDmesg.h"
 #include "cmsis.h"
 #include "pinmap.h"
 #include "PeripheralPins.h"
 #include "pwmout_device.h"
+
+#define LOG DMESG
 
 static TIM_HandleTypeDef TimHandle;
 
@@ -45,6 +48,7 @@ extern "C" void pwmout_init(pwmout_t *obj, PinNumber pin)
     // Get the functions (timer channel, (non)inverted) from the pin and assign it to the object
     uint32_t function = pinmap_function(pin, PinMap_PWM);
     CODAL_ASSERT(function != (uint32_t)NC);
+    
     obj->channel = STM_PIN_CHANNEL(function);
     obj->inverted = STM_PIN_INVERTED(function);
 
@@ -166,20 +170,18 @@ extern "C" void pwmout_free(pwmout_t *obj)
     pin_function(obj->pin, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, 0));
 }
 
-extern "C" void pwmout_write(pwmout_t *obj, float value)
+extern "C" void pwmout_write(pwmout_t *obj, uint32_t pulse)
 {
     TIM_OC_InitTypeDef sConfig;
     int channel = 0;
 
     TimHandle.Instance = (TIM_TypeDef *)(obj->pwm);
 
-    if (value < (float)0.0) {
-        value = 0.0;
-    } else if (value > (float)1.0) {
-        value = 1.0;
+    if (pulse > obj->period) {
+        pulse = obj->period;
     }
 
-    obj->pulse = (uint32_t)((float)obj->period * value);
+    obj->pulse = pulse;
 
     // Configure channels
     sConfig.OCMode       = TIM_OCMODE_PWM1;
@@ -212,7 +214,7 @@ extern "C" void pwmout_write(pwmout_t *obj, float value)
     }
 
     if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, channel) != HAL_OK) {
-        printf( "Cannot initialize PWM\n");
+        LOG( "Cannot initialize PWM\n");
     }
 
     if (obj->inverted) {
@@ -263,7 +265,7 @@ extern "C" void pwmout_period_us(pwmout_t *obj, int us)
     }
 
     if (pwm_apb_map_table[i].pwm == 0) {
-        printf( "Unknown PWM instance");
+        LOG( "Unknown PWM instance");
     }
 
     if (pwm_apb_map_table[i].pwmoutApb == PWMOUT_ON_APB1) {
@@ -297,7 +299,7 @@ extern "C" void pwmout_period_us(pwmout_t *obj, int us)
         /*  Period decreases and prescaler increases over loops, so check for
          *  possible out of range cases */
         if ((TimHandle.Init.Period < 0xFFFF) && (TimHandle.Init.Prescaler > 0xFFFF)) {
-            printf( "Cannot initialize PWM\n");
+            LOG( "Cannot initialize PWM\n");
             break;
         }
     }
@@ -306,7 +308,7 @@ extern "C" void pwmout_period_us(pwmout_t *obj, int us)
     TimHandle.Init.CounterMode   = TIM_COUNTERMODE_UP;
 
     if (HAL_TIM_PWM_Init(&TimHandle) != HAL_OK) {
-        printf( "Cannot initialize PWM\n");
+        LOG( "Cannot initialize PWM\n");
     }
 
     // Save for future use

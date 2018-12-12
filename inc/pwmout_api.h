@@ -62,9 +62,9 @@ void pwmout_free(pwmout_t *obj);
  *
  * Value 0.0f represents 0 percentage, 1.0f represents 100 percent.
  * @param obj     The pwmout object
- * @param percent The floating-point percentage number
+ * @param pulse 
  */
-void pwmout_write(pwmout_t *obj, float percent);
+void pwmout_write(pwmout_t *obj, uint32_t pulse);
 
 /** Read the current float-point output duty-cycle
  *

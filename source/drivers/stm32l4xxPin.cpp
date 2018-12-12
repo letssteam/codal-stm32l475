@@ -131,7 +131,7 @@ int STM32L4xxPin::setDigitalValue(int value)
     if (!(status & IO_STATUS_DIGITAL_OUT))
     {
         disconnect();
-        pin_function(name, STM_PIN_DATA(STM_PIN_OUTPUT, GPIO_NOPULL, 0));
+        pin_function(name, STM_PIN_DATA(STM_PIN_OUTPUT, map(this->pullMode), 0));
         status |= IO_STATUS_DIGITAL_OUT;
     }
 
@@ -200,13 +200,13 @@ int STM32L4xxPin::obtainAnalogChannel()
     return DEVICE_OK;
 }
 
-int STM32L4xxPin::setPWM(uint32_t value, uint32_t period)
+int STM32L4xxPin::setPWM(uint64_t value, uint32_t period)
 {
     // sanitise the level value
     if (value > period)
         value = period;
 
-    if (obtainAnalogChannel())
+    if (obtainAnalogChannel() != DEVICE_OK)
         return DEVICE_INVALID_PARAMETER;
 
     auto cfg = this->pwmCfg;

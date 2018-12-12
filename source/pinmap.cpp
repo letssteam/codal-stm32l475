@@ -27,9 +27,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
-
+#include "CodalDmesg.h"
 #include "pinmap.h"
 #include "pin_device.h"
+#define LOG DMESG
 
 const uint32_t ll_pin_defines[16] = {
     LL_GPIO_PIN_0,  LL_GPIO_PIN_1,  LL_GPIO_PIN_2,  LL_GPIO_PIN_3, LL_GPIO_PIN_4,  LL_GPIO_PIN_5,
@@ -124,7 +125,7 @@ extern "C" GPIO_TypeDef *Set_GPIO_Clock(uint32_t port_idx)
         break;
 #endif
     default:
-        printf("Pinmap error: wrong port number.");
+        LOG("Pinmap error: wrong port number.");
         break;
     }
     return (GPIO_TypeDef *)gpio_add;
@@ -188,7 +189,7 @@ extern "C" GPIO_TypeDef *Get_GPIO_Port(uint32_t port_idx)
         break;
 #endif
     default:
-        printf("Pinmap error: wrong port number.");
+        LOG("Pinmap error: wrong port number.");
         break;
     }
     return (GPIO_TypeDef *)gpio_add;
@@ -201,7 +202,7 @@ extern "C" void pin_function(PinNumber pin, int data)
 {
     CODAL_ASSERT(pin != PinNumber::NC);
 
-    // printf("pin_function(%x, %x)\n",(uint8_t)pin, data);
+    // LOG("pin_function(%x, %x)\n",(uint8_t)pin, data);
     // Get the pin informations
     uint32_t mode = STM_PIN_FUNCTION(data);
     uint32_t afnum = STM_PIN_AFNUM(data);
@@ -240,7 +241,7 @@ extern "C" void pin_function(PinNumber pin, int data)
         ll_mode = LL_GPIO_MODE_ANALOG;
         break;
     default:
-        printf("incorect pin mode !");
+        LOG("incorect pin mode !");
         break;
     }
     LL_GPIO_SetPinMode(gpio, ll_pin, ll_mode);
@@ -328,7 +329,7 @@ extern "C" void pinmap_pinout(PinNumber pin, const PinMap *map)
         }
         map++;
     }
-    printf("could not pinout");
+    LOG("could not pinout");
 }
 
 extern "C" uint32_t pinmap_merge(uint32_t a, uint32_t b)
@@ -380,7 +381,7 @@ extern "C" uint32_t pinmap_peripheral(PinNumber pin, const PinMap *map)
         return (uint32_t)NC;
     peripheral = pinmap_find_peripheral(pin, map);
     if ((uint32_t)NC == peripheral) // no mapping available
-        printf("pinmap not found for peripheral");
+        LOG("pinmap not found for peripheral");
     return peripheral;
 }
 
