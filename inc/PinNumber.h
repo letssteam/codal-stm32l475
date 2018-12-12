@@ -204,6 +204,7 @@ enum class PinNumber:uint8_t {
     };
 }
 typedef codal::PinNumber PinNumber;
+typedef codal::PinNumber PinName;
 constexpr auto NC = -1;
 
 #endif

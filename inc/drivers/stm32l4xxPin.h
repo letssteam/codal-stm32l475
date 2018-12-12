@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include "Button.h"
 #include "CodalConfig.h"
 #include "pwmout_api.h"
+#include "analogin_device.h"
 
 #ifndef DEVICE_DEFAULT_PWM_PERIOD
 #define DEVICE_DEFAULT_PWM_PERIOD 20000
@@ -51,6 +52,7 @@ protected:
         pwmout_t *pwmCfg;
         STM32L4xxEventConfig *evCfg;
         Button *btn;
+        analogin_t *adcCfg;
     };
 
     void config(int status);

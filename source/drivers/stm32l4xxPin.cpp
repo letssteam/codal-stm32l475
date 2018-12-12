@@ -21,6 +21,8 @@
 #define GPIO_PORT() ((GPIO_TypeDef *)(GPIOA_BASE + 0x400 * ((int)name >> 4)))
 #define GPIO_PIN() (1 << ((uint32_t)name & 0xf))
 
+extern "C" uint16_t adc_read(analogin_t *obj);
+
 namespace codal
 {
 
@@ -80,6 +82,13 @@ void STM32L4xxPin::disconnect()
         if (this->pwmCfg)
             delete this->pwmCfg;
         this->pwmCfg = NULL;
+    }
+
+    if (this->status & IO_STATUS_ANALOG_IN)
+    {
+        if (this->adcCfg)
+            delete this->adcCfg;
+        this->adcCfg = NULL;
     }
 
     if (this->status & (IO_STATUS_EVENT_ON_EDGE | IO_STATUS_EVENT_PULSE_ON_EDGE))
@@ -178,7 +187,6 @@ int STM32L4xxPin::getDigitalValue(PullMode pull)
 
 int STM32L4xxPin::obtainAnalogChannel()
 {
-    
     // Move into an analog output state if necessary
     if (!(status & IO_STATUS_ANALOG_OUT))
     {
@@ -187,7 +195,6 @@ int STM32L4xxPin::obtainAnalogChannel()
         this->pwmCfg = new pwmout_t;
         pwmout_init(this->pwmCfg, name);
         status |= IO_STATUS_ANALOG_OUT;
-        printf("obtainAnalogChannel()\n");
     }
 
     return DEVICE_OK;
@@ -221,7 +228,6 @@ int STM32L4xxPin::setPWM(uint32_t value, uint32_t period)
  */
 int STM32L4xxPin::setAnalogValue(int value)
 {
-    printf("STM32L4xxPin::setAnalogValue(%d)\n", value);
     // sanitise the level value
     if (value < 0 || value > DEVICE_PIN_MAX_OUTPUT)
         return DEVICE_INVALID_PARAMETER;
@@ -278,6 +284,8 @@ int STM32L4xxPin::setServoValue(int value, int range, int center)
     return setServoPulseUs(scaled / 1000);
 }
 
+
+
 /**
  * Configures this IO pin as an analogue input (if necessary), and samples the STM32L4xxPin for its analog
  * value.
@@ -293,8 +301,24 @@ int STM32L4xxPin::setServoValue(int value, int range, int center)
 int STM32L4xxPin::getAnalogValue()
 {
     // check if this pin has an analogue mode...
-    //    if (!(PIN_CAPABILITY_ANALOG & capability))
-    return DEVICE_NOT_SUPPORTED;
+    if (!(PIN_CAPABILITY_ANALOG & capability))
+        return DEVICE_NOT_SUPPORTED;
+    
+    if (!(status & IO_STATUS_ANALOG_IN))
+    {
+        disconnect();
+        pin_function(name, STM_PIN_DATA(STM_PIN_ANALOG, map(this->pullMode), 0));
+        this->adcCfg = new analogin_t;
+        analogin_init(this->adcCfg, name);
+        status = IO_STATUS_ANALOG_IN;
+    }
+
+    uint16_t ret = adc_read(this->adcCfg);
+
+    if (ret <= 0)
+        return DEVICE_NOT_SUPPORTED;
+
+    return ret;
 }
 
 /**

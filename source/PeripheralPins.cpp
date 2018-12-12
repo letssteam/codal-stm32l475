@@ -92,6 +92,13 @@ extern "C" const PinMap PinMap_ADC[] = {
 };
 #endif
 
+extern "C" const PinMap PinMap_ADC_Internal[] = {
+    {codal::PinNumber::ADC_TEMP,   ADC_1,    STM_PIN_DATA_EXT(STM_MODE_ANALOG_ADC_CONTROL, GPIO_NOPULL, 0, 17, 0)},
+    {codal::PinNumber::ADC_VREF,   ADC_1,    STM_PIN_DATA_EXT(STM_MODE_ANALOG_ADC_CONTROL, GPIO_NOPULL, 0,  0, 0)},
+    {codal::PinNumber::ADC_VBAT,   ADC_1,    STM_PIN_DATA_EXT(STM_MODE_ANALOG_ADC_CONTROL, GPIO_NOPULL, 0, 18, 0)},
+    {codal::PinNumber::NC, NP, 0}
+};
+
 //*** DAC ***
 
 #ifdef HAL_DAC_MODULE_ENABLED
