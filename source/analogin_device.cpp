@@ -29,7 +29,7 @@ void analogin_init(analogin_t *obj, PinNumber pin)
     // ADC Internal Channels "pins"  (Temperature, Vref, Vbat, ...)
     //   are described in PinNames.h and PeripheralPins.c
     //   Pin value must be between 0xF0 and 0xFF
-    if ((((uint8_t)pin) < 0xF0) || (((uint8_t)pin) > 0xFF)) {
+    if ((((uint8_t)pin) < 0xF0)) {
         // Normal channels
         // Get the peripheral name from the pin and assign it to the object
         obj->handle.Instance = (ADC_TypeDef *)pinmap_peripheral(pin, PinMap_ADC);
