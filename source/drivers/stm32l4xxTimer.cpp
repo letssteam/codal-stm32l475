@@ -14,6 +14,7 @@ STM32L4xxTimer::STM32L4xxTimer() : codal::Timer()
     memset(&TimHandle, 0, sizeof(TimHandle));
     instance = this;
     this->prev = 0;
+    init();
 }
 
 extern "C" void TIM5_IRQHandler()
@@ -33,40 +34,20 @@ extern "C" void TIM5_IRQHandler()
 
 void STM32L4xxTimer::init()
 {
-    RCC_ClkInitTypeDef RCC_ClkInitStruct;
-    uint32_t PclkFreq;
-
-    // Get clock configuration
-    // Note: PclkFreq contains here the Latency (not used after)
-    HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &PclkFreq);
-
-    PclkFreq = HAL_RCC_GetPCLK1Freq();
-
     // Enable timer clock
     __HAL_RCC_TIM5_CLK_ENABLE(); 
-
-    __HAL_RCC_TIM5_FORCE_RESET();
-    __HAL_RCC_TIM5_RELEASE_RESET();
 
     TimHandle.Instance = TIM5;
 
     TimHandle.Init.Period = 0xFFFFFFFF;
-
-    if (RCC_ClkInitStruct.APB1CLKDivider == RCC_HCLK_DIV1) {
-        TimHandle.Init.Prescaler   = (uint32_t)((PclkFreq) / 1000000U) - 1U; // 1 us tick
-    } else {
-        TimHandle.Init.Prescaler   = (uint32_t)((PclkFreq * 2) / 1000000U) - 1U; // 1 us tick
-    }
-
+    TimHandle.Init.Prescaler = (uint32_t)((SystemCoreClock / 1000000) - 1); 
     TimHandle.Init.ClockDivision = 0;
     TimHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 
     if (HAL_TIM_OC_Init(&TimHandle) != HAL_OK)
         CODAL_ASSERT(0);
 
-    /* Configure the TIM5 IRQ priority */
-    HAL_NVIC_SetPriority(TIM5_IRQn, 0U, 0U);
-    /* Enable the TIM5 global Interrupt */
+    HAL_NVIC_SetPriority(TIM5_IRQn, 1U, 0U);
     HAL_NVIC_EnableIRQ(TIM5_IRQn);
 
     HAL_TIM_OC_Start(&TimHandle, TIM_CHANNEL_1);
@@ -79,13 +60,10 @@ void STM32L4xxTimer::triggerIn(CODAL_TIMESTAMP t)
     if (t < 20)
         t = 20;
 
-    this->syncRequest(); // is this needed?
-
     target_disable_irq();
     __HAL_TIM_DISABLE_IT(&TimHandle, TIM_IT_CC1);
-    __HAL_TIM_SET_COMPARE(&TimHandle, TIM_CHANNEL_1, (uint32_t)(__HAL_TIM_GET_COUNTER(&TimHandle) + t));
-        // Ensure the compare event starts clear
-    __HAL_TIM_CLEAR_FLAG(&TimHandle, TIM_FLAG_CC1);
+    __HAL_TIM_SET_COMPARE(&TimHandle, TIM_CHANNEL_1, 
+            (uint32_t)(__HAL_TIM_GET_COUNTER(&TimHandle) + t));
     __HAL_TIM_ENABLE_IT(&TimHandle, TIM_IT_CC1);
     target_enable_irq();
 }
@@ -98,7 +76,7 @@ void STM32L4xxTimer::syncRequest()
     uint32_t curr = __HAL_TIM_GET_COUNTER(&TimHandle);
     uint32_t delta = curr - this->prev;
 
-    // update the hal...
+    // update the hal... - this won't work if this is called more than once per millisecond
     uwTick += delta / 1000;
 
     this->prev = curr;
