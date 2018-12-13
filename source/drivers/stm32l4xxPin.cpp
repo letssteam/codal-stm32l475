@@ -312,8 +312,9 @@ int STM32L4xxPin::getAnalogValue()
         analogin_init(this->adcCfg, name);
         status = IO_STATUS_ANALOG_IN;
     }
-    uint16_t offset = 1980;
-    uint16_t ret = (adc_read(this->adcCfg) - offset)>>1;
+    
+    uint16_t offset = 0;
+    uint16_t ret = (adc_read(this->adcCfg) - offset);
 
     if (ret <= 0)
         return DEVICE_NOT_SUPPORTED;
