@@ -25,6 +25,8 @@ extern "C" uint16_t adc_read(analogin_t *obj);
 
 namespace codal
 {
+static uint16_t adc_offset = 0;
+
 
 static STM32L4xxPin *eventPin[16];
 
@@ -312,14 +314,15 @@ int STM32L4xxPin::getAnalogValue()
         analogin_init(this->adcCfg, name);
         status = IO_STATUS_ANALOG_IN;
     }
-    
-    uint16_t offset = 0;
-    uint16_t ret = (adc_read(this->adcCfg) - offset);
+
+    uint16_t ret = adc_read(this->adcCfg);
 
     if (ret <= 0)
-        return DEVICE_NOT_SUPPORTED;
+        adc_offset = ret;
+    else if (ret > 4095)
+        adc_offset = ret - 4095;
 
-    return ret;
+    return (ret - adc_offset)>>2;
 }
 
 /**
