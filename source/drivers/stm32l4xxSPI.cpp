@@ -13,7 +13,7 @@
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 //#define LOG DMESG
-#define LOG(...) ((void)0)
+#define LOG(...) printf(__VA_ARGS__)
 
 
 using namespace codal;
@@ -79,7 +79,7 @@ static int enable_clock(uint32_t instance)
 
 void STM32L4xxSPI::complete()
 {
-    LOG("SPI complete D=%p", doneHandler);
+    LOG("SPI complete D=%p\n", doneHandler);
     if (doneHandler)
     {
         PVoidCallback done = doneHandler;
@@ -95,7 +95,7 @@ void STM32L4xxSPI::complete()
 
 void STM32L4xxSPI::_complete(uint32_t instance)
 {
-    LOG("SPI complete %p", instance);
+    LOG("SPI complete %p\n", instance);
     for (unsigned i = 0; i < ARRAY_SIZE(instances); ++i)
     {
         if (instances[i] && (uint32_t)instances[i]->spi.Instance == instance)
@@ -108,7 +108,7 @@ void STM32L4xxSPI::_complete(uint32_t instance)
 
 void STM32L4xxSPI::_irq(uint32_t instance)
 {
-    LOG("SPI IRQ %p", instance);
+    LOG("SPI IRQ %p\n", instance);
     for (unsigned i = 0; i < ARRAY_SIZE(instances); ++i)
     {
         if (instances[i] && (uint32_t)instances[i]->spi.Instance == instance)
@@ -154,6 +154,7 @@ DEFIRQ(SPI6_IRQHandler, SPI6_BASE)
 
 void STM32L4xxSPI::init()
 {
+    LOG("STM32L4xxSPI::init()\n");    
     if (!needsInit)
         return;
 
@@ -168,7 +169,7 @@ void STM32L4xxSPI::init()
         spi.Instance = (SPI_TypeDef *)instance;
     }
 
-    LOG("SPI instance %p", spi.Instance);
+    LOG("SPI instance %p\n", spi.Instance);
 
     spi.Init.Direction = SPI_DIRECTION_2LINES;
     spi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -192,6 +193,8 @@ void STM32L4xxSPI::init()
 
     auto res = HAL_SPI_Init(&spi);
     CODAL_ASSERT(res == HAL_OK);
+    LOG("SPI%d Initialized !\n", spi.Instance == SPI3 ? 3 : spi.Instance == SPI2 ? 2 : spi.Instance == SPI1 ? 1 : 0);    
+
 }
 
 STM32L4xxSPI::STM32L4xxSPI(Pin &mosi, Pin &miso, Pin &sclk) : codal::SPI(), mosi(mosi), miso(miso), sclk(sclk)
@@ -240,9 +243,9 @@ int STM32L4xxSPI::transfer(const uint8_t *txBuffer, uint32_t txSize, uint8_t *rx
 {    
     fiber_wake_on_event(DEVICE_ID_NOTIFY, transferCompleteEventCode);
     auto res = startTransfer(txBuffer, txSize, rxBuffer, rxSize, NULL, NULL);
-    LOG("SPI ->");
+    LOG("SPI ->\n");
     schedule();
-    LOG("SPI <-");
+    LOG("SPI <-\n");
     return res;
 }
 
@@ -253,7 +256,7 @@ int STM32L4xxSPI::startTransfer(const uint8_t *txBuffer, uint32_t txSize, uint8_
 
     init();
 
-    LOG("SPI start %p/%d %p/%d D=%p", txBuffer, txSize, rxBuffer, rxSize, doneHandler);
+    LOG("SPI start %p/%d %p/%d D=%p\n", txBuffer, txSize, rxBuffer, rxSize, doneHandler);
 
     this->doneHandler = doneHandler;
     this->doneHandlerArg = arg;

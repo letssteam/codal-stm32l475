@@ -35,10 +35,12 @@ protected:
     uint8_t rxCh, txCh;
     uint16_t transferCompleteEventCode;
 
+
+
+public:
     void complete();
     void init();
 
-public:
     static void _complete(uint32_t instance);
     static void _irq(uint32_t instance);
 
