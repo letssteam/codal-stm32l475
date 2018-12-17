@@ -95,7 +95,7 @@ void STM32L4xxSPI::complete()
 
 void STM32L4xxSPI::_complete(uint32_t instance)
 {
-    LOG("SPI complete %p\n", instance);
+    LOG("SPI complete %lx\n", instance);
     for (unsigned i = 0; i < ARRAY_SIZE(instances); ++i)
     {
         if (instances[i] && (uint32_t)instances[i]->spi.Instance == instance)
@@ -108,7 +108,7 @@ void STM32L4xxSPI::_complete(uint32_t instance)
 
 void STM32L4xxSPI::_irq(uint32_t instance)
 {
-    LOG("SPI IRQ %p\n", instance);
+    LOG("SPI IRQ %lx\n", instance);
     for (unsigned i = 0; i < ARRAY_SIZE(instances); ++i)
     {
         if (instances[i] && (uint32_t)instances[i]->spi.Instance == instance)
@@ -256,7 +256,7 @@ int STM32L4xxSPI::startTransfer(const uint8_t *txBuffer, uint32_t txSize, uint8_
 
     init();
 
-    LOG("SPI start %p/%d %p/%d D=%p\n", txBuffer, txSize, rxBuffer, rxSize, doneHandler);
+    LOG("SPI start %p/%ld %p/%ld D=%p\n", txBuffer, txSize, rxBuffer, rxSize, doneHandler);
 
     this->doneHandler = doneHandler;
     this->doneHandlerArg = arg;
