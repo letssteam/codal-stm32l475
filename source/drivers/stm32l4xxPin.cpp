@@ -554,7 +554,6 @@ DEF(EXTI1_IRQHandler)
 DEF(EXTI2_IRQHandler)
 DEF(EXTI3_IRQHandler)
 DEF(EXTI4_IRQHandler)
-DEF(EXTI9_5_IRQHandler)
 DEF(EXTI15_10_IRQHandler)
 
 static void enable_irqs()
@@ -564,7 +563,6 @@ static void enable_irqs()
     NVIC_EnableIRQ(EXTI2_IRQn);
     NVIC_EnableIRQ(EXTI3_IRQn);
     NVIC_EnableIRQ(EXTI4_IRQn);
-    NVIC_EnableIRQ(EXTI9_5_IRQn);
     NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
