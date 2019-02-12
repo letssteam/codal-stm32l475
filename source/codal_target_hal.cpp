@@ -1,15 +1,24 @@
 #include "stm32.h"
 #include "codal_target_hal.h"
 #include "CodalDmesg.h"
+#include "CodalCompat.h"
+#include "Timer.h"
 
+static int8_t irq_disabled;
 void target_enable_irq()
 {
-    __enable_irq();
+    irq_disabled--;
+    if (irq_disabled <= 0) {
+        irq_disabled = 0;
+        __enable_irq();
+    }
 }
 
 void target_disable_irq()
 {
-    __disable_irq();
+    irq_disabled++;
+    if (irq_disabled == 1)
+        __disable_irq();
 }
 
 void target_wait_for_event()
@@ -22,6 +31,20 @@ void target_wait(uint32_t milliseconds)
     HAL_Delay(milliseconds);
 }
 
+void target_wait_us(unsigned long us)
+{
+    codal::system_timer_wait_us(us);
+}
+
+int target_seed_random(uint32_t rand)
+{
+    return codal::seed_random(rand);
+}
+
+int target_random(int max)
+{
+    return codal::random(max);
+}
 
 /*
     The unique device identifier is ideally suited:
@@ -39,36 +62,37 @@ uint32_t target_get_serial()
     return STM32_UUID[0]^(STM32_UUID[1]*17)^(STM32_UUID[2]*13);
 }
 
-extern void wait_us(uint32_t);
-void target_wait_us(unsigned long us)
-{
-    wait_us(us);
-}
-
 void target_reset()
 {
+#ifdef STM32F4
+    PWR->CR |= PWR_CR_DBP;
+    RCC->BDCR |= RCC_BDCR_RTCEN;
+    RTC->BKP0R = 0x24a22d12; // skip bootloader
+#endif
     NVIC_SystemReset();
 }
 
-void assert_failed(uint8_t* file, uint32_t line)
+extern "C" void assert_failed(uint8_t* file, uint32_t line)
 {
     target_panic(920);
 }
 
+__attribute__((weak))
 void target_panic(int statusCode)
 {
     target_disable_irq();
+
+    DMESG("*** CODAL PANIC : [%d]", statusCode);
     while (1)
     {
-        printf("*** CODAL PANIC : [%.3d]\n", statusCode);
-        target_wait(500);
     }
 }
 
+extern "C" void init_irqs();
 void target_init()
 {
-    init_Handlers();
     HAL_Init();
+    init_irqs();
 }
 
 /**
@@ -77,7 +101,7 @@ void target_init()
  * This is probably overkill, but the ARMCC compiler uses a lot register optimisation
  * in its calling conventions, so better safe than sorry!
  */
-typedef struct PROCESSOR_TCB
+struct PROCESSOR_TCB
 {
     uint32_t R0;
     uint32_t R1;
@@ -95,7 +119,7 @@ typedef struct PROCESSOR_TCB
     uint32_t SP;
     uint32_t LR;
     uint32_t stack_base;
-} PROCESSOR_TCB;
+};
 
 PROCESSOR_WORD_TYPE fiber_initial_stack_base()
 {
