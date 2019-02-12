@@ -46,6 +46,7 @@ class STM32L4xxLowLevelTimer : public LowLevelTimer
     friend void timer_irq_handler(uint8_t index);
 };
 
+void timer_irq_handler(uint8_t index);
 }
 
 #endif

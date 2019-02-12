@@ -5,7 +5,7 @@ using namespace codal;
 
 STM32L4xxLowLevelTimer* instances[5] = { 0 };
 
-void timer_irq_handler(uint8_t index)
+void codal::timer_irq_handler(uint8_t index)
 {
     if (instances[index] == NULL)
         return;
