@@ -88,11 +88,10 @@ void target_panic(int statusCode)
     }
 }
 
-extern "C" void init_irqs();
 void target_init()
 {
+    init_Handlers();
     HAL_Init();
-    init_irqs();
 }
 
 /**
