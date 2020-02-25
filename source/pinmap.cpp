@@ -200,7 +200,7 @@ extern "C" GPIO_TypeDef *Get_GPIO_Port(uint32_t port_idx)
  */
 extern "C" void pin_function(PinNumber pin, int data)
 {
-    CODAL_ASSERT(pin != PinNumber::NC);
+    CODAL_ASSERT(pin != PinNumber::NC, 99);
 
     // LOG("pin_function(%x, %x)\n",(uint8_t)pin, data);
     // Get the pin informations
@@ -281,7 +281,7 @@ extern "C" void pin_function(PinNumber pin, int data)
  */
 extern "C" void pin_mode(PinNumber pin, PinMode mode)
 {
-    CODAL_ASSERT(pin != PinNumber::NC);
+    CODAL_ASSERT(pin != PinNumber::NC, 99);
 
     uint32_t port_index = STM_PORT(pin);
     uint32_t ll_pin = ll_pin_defines[STM_PIN(pin)];
@@ -469,6 +469,6 @@ uint32_t codal_setup_pin(codal::Pin &p, uint32_t prev, const PinMap *map)
     uint32_t tmp = pinmap_peripheral(pin, map);
     pin_function(pin, pinmap_function(pin, map));
     pin_mode(pin, PullNone);
-    CODAL_ASSERT(!prev || prev == tmp);
+    CODAL_ASSERT(!prev || prev == tmp, 99);
     return tmp;
 }

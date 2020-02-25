@@ -27,8 +27,4 @@ void wait_us(uint32_t us);
 #ifdef __cplusplus
 }
 #endif
-
-#define CODAL_ASSERT(cond)                                                                         \
-    if (!(cond))                                                                                   \
-    target_panic(909)
 #endif

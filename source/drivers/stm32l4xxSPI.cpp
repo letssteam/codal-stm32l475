@@ -71,7 +71,7 @@ static int enable_clock(uint32_t instance)
         return HAL_RCC_GetPCLK2Freq();
     #endif
     default:
-        CODAL_ASSERT(0);
+        CODAL_ASSERT(0, 99);
         return 0;
     }
     return 0;
@@ -192,7 +192,7 @@ void STM32L4xxSPI::init()
     spi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
 
     auto res = HAL_SPI_Init(&spi);
-    CODAL_ASSERT(res == HAL_OK);
+    CODAL_ASSERT(res == HAL_OK, 99);
     LOG("SPI%d Initialized !\n", spi.Instance == SPI3 ? 3 : spi.Instance == SPI2 ? 2 : spi.Instance == SPI1 ? 1 : 0);    
 
 }
@@ -225,7 +225,7 @@ int STM32L4xxSPI::setMode(int mode, int bits)
     spi.Init.CLKPolarity = mode & 2 ? SPI_POLARITY_HIGH : SPI_POLARITY_LOW;
     needsInit = true;
 
-    CODAL_ASSERT(bits == 8);
+    CODAL_ASSERT(bits == 8, 99);
 
     return DEVICE_OK;
 }
@@ -263,7 +263,7 @@ int STM32L4xxSPI::startTransfer(const uint8_t *txBuffer, uint32_t txSize, uint8_
 
     if (txSize && rxSize)
     {
-        CODAL_ASSERT(txSize == rxSize); // we could support this if needed
+        CODAL_ASSERT(txSize == rxSize, 99); // we could support this if needed
         res = HAL_SPI_TransmitReceive_DMA(&spi, (uint8_t *)txBuffer, rxBuffer, txSize);
     }
     else if (txSize)
@@ -279,7 +279,7 @@ int STM32L4xxSPI::startTransfer(const uint8_t *txBuffer, uint32_t txSize, uint8_
         return 0; // nothing to do
     }
 
-    CODAL_ASSERT(res == HAL_OK);
+    CODAL_ASSERT(res == HAL_OK, 99);
 
     return 0;
 }

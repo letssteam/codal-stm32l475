@@ -107,7 +107,7 @@ int STM32L4xxI2C::write(uint16_t address, uint8_t *data, int len, bool repeated)
     if (data == NULL || len <= 0)
         return DEVICE_INVALID_PARAMETER;
 
-    CODAL_ASSERT(!repeated);
+    CODAL_ASSERT(!repeated, 99);
 
     init();
 
@@ -142,7 +142,7 @@ int STM32L4xxI2C::read(uint16_t address, uint8_t *data, int len, bool repeated)
 {
     if (data == NULL || len <= 0)
         return DEVICE_INVALID_PARAMETER;
-    CODAL_ASSERT(!repeated);
+    CODAL_ASSERT(!repeated, 99);
 
     init();
 
@@ -183,7 +183,7 @@ int STM32L4xxI2C::readRegister(uint16_t address, uint8_t reg, uint8_t *data, int
     if (data == NULL || length <= 0)
         return DEVICE_INVALID_PARAMETER;
 
-    CODAL_ASSERT(!repeated);
+    CODAL_ASSERT(!repeated, 99);
 
     init();
 

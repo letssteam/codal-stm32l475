@@ -1,3 +1,4 @@
+#include "CodalConfig.h"
 #include "analogin_device.h"
 
 #include "cmsis.h"
@@ -43,8 +44,8 @@ void analogin_init(analogin_t *obj, PinNumber pin)
         function = pinmap_function(pin, PinMap_ADC_Internal);
         // No GPIO configuration for internal channels
     }
-    CODAL_ASSERT(obj->handle.Instance != (ADC_TypeDef *)NC);
-    CODAL_ASSERT(function != (uint32_t)NC);
+    CODAL_ASSERT(obj->handle.Instance != (ADC_TypeDef *)NC, 99);
+    CODAL_ASSERT(function != (uint32_t)NC, 99);
 
     obj->channel = STM_PIN_CHANNEL(function);
 

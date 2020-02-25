@@ -43,11 +43,11 @@ extern "C" void pwmout_init(pwmout_t *obj, PinNumber pin)
 {
     // Get the peripheral name from the pin and assign it to the object
     obj->pwm = (PWMName)pinmap_peripheral(pin, PinMap_PWM);
-    CODAL_ASSERT(obj->pwm != (PWMName)NC);
+    CODAL_ASSERT(obj->pwm != (PWMName)NC, 99);
 
     // Get the functions (timer channel, (non)inverted) from the pin and assign it to the object
     uint32_t function = pinmap_function(pin, PinMap_PWM);
-    CODAL_ASSERT(function != (uint32_t)NC);
+    CODAL_ASSERT(function != (uint32_t)NC, 99);
     
     obj->channel = STM_PIN_CHANNEL(function);
     obj->inverted = STM_PIN_INVERTED(function);
